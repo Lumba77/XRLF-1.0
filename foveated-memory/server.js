@@ -2647,10 +2647,10 @@ _server.listen(config.proxy_port, '127.0.0.1', () => {
     }
 
     // --- Automatic Public Tunnel ---
-    const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
     console.log(`\n[Tunnel] Starting dedicated public tunnel for Google Orchestrator...`);
     const { spawn } = require('child_process');
-    const tunnel = spawn(npxCmd, ['-y', 'localtunnel', '--port', config.proxy_port, '--subdomain', 'foveated-memory-public']);
+    const tunnelCmd = `npx -y localtunnel --port ${config.proxy_port} --subdomain foveated-memory-public`;
+    const tunnel = spawn(tunnelCmd, { shell: true });
     
     tunnel.stdout.on('data', data => {
         const out = data.toString().trim();
