@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ═══════════════════════════════════════════════════════
  * SKELETON SLIMMER — Constellation Map Generator
  * ═══════════════════════════════════════════════════════
@@ -35,10 +35,10 @@ const path = require('path');
 
 // ── Config ──────────────────────────────────────────────────────────────────
 
-const SKELETON_MAX_CHARS  = parseInt(process.env.LUMAX_SKELETON_MAX_CHARS  || '800', 10);
-const SKELETON_MAX_DEPTH  = parseInt(process.env.LUMAX_SKELETON_MAX_DEPTH  || '3',   10);
-const SKELETON_MAX_FILES  = parseInt(process.env.LUMAX_SKELETON_MAX_FILES  || '60',  10);
-const SKELETON_MAX_ANNOT = parseInt(process.env.LUMAX_SKELETON_MAX_ANNOT  || '40',  10);
+const SKELETON_MAX_CHARS  = parseInt(process.env.XRLF_SKELETON_MAX_CHARS  || '800', 10);
+const SKELETON_MAX_DEPTH  = parseInt(process.env.XRLF_SKELETON_MAX_DEPTH  || '3',   10);
+const SKELETON_MAX_FILES  = parseInt(process.env.XRLF_SKELETON_MAX_FILES  || '60',  10);
+const SKELETON_MAX_ANNOT = parseInt(process.env.XRLF_SKELETON_MAX_ANNOT  || '40',  10);
 
 // Directories to skip entirely
 const SKIP_DIRS = new Set([
@@ -233,7 +233,7 @@ function getCachedSkeleton(rootDir, cachePath) {
         cachePath = path.resolve(__dirname, '..', 'repo-skeleton.md');
     }
 
-    const CACHE_TTL = parseInt(process.env.LUMAX_SKELETON_CACHE_TTL || '300000', 10); // 5 min default
+    const CACHE_TTL = parseInt(process.env.XRLF_SKELETON_CACHE_TTL || '300000', 10); // 5 min default
 
     try {
         if (fs.existsSync(cachePath)) {

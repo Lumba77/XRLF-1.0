@@ -1,4 +1,4 @@
-
+﻿
 
 
 # instructions
@@ -45,8 +45,8 @@ Here’s the exact location of the interference:
 1. Proxy environment variables
 These are the ones that XRLF test repo hijacked:
 
--LUMAX_COGNITIVE_MODE
--LUMAX_PROXY_MODEL
+-XRLF_COGNITIVE_MODE
+-XRLF_PROXY_MODEL
 -FOVEA_PASSTHROUGH_MODE
 -XRLF_REPO_ENABLED
 -XRLF_CONTEXT_OVERRIDE
@@ -144,8 +144,8 @@ Here’s the exact location of the interference:
 1. Proxy environment variables
 These are the ones that XRLF test repo hijacked:
 
--LUMAX_COGNITIVE_MODE
--LUMAX_PROXY_MODEL
+-XRLF_COGNITIVE_MODE
+-XRLF_PROXY_MODEL
 -FOVEA_PASSTHROUGH_MODE
 -XRLF_REPO_ENABLED
 -XRLF_CONTEXT_OVERRIDE
@@ -230,37 +230,37 @@ XRLF_REPO_ENABLED=false
 # XRLF_CAPABILITY_OVERRIDE=false # Disable repo capabilities override
 # XRLF_FOVEATION_OVERRIDE=false # Disable repo foveation override
 # ── Core ─────────────────────────────────────────────────────
-# LUMAX_COGNITIVE_MODE=local # local | cloud
-# LUMAX_PROXY_MODEL= # Override upstream model name
-# LUMAX_MODEL_LOCAL_ID= # Local LM Studio model ID
-# LUMAX_MODEL_CLOUD_ID= # Cloud model ID (Ollama Cloud)
+# XRLF_COGNITIVE_MODE=local # local | cloud
+# XRLF_PROXY_MODEL= # Override upstream model name
+# XRLF_MODEL_LOCAL_ID= # Local LM Studio model ID
+# XRLF_MODEL_CLOUD_ID= # Cloud model ID (Ollama Cloud)
 # ── Code Preservation ────────────────────────────────────────
 # When enabled (default), critical code structures are extracted
 # BEFORE the stripping/compression pipeline and restored AFTER.
 # This prevents code fences, thinking blocks, JSON schemas, and
 # tool definitions from being destroyed by aggressive compression.
 # Conditioned by XRLF_CAPABILITY_OVERRIDE.
-LUMAX_PRESERVE_CODE=true
+XRLF_PRESERVE_CODE=true
 # ── Context Healer ───────────────────────────────────────────
-# LUMAX_CTX_MAX_CHARS=50000 # Max context budget in chars
-# LUMAX_CTX_MIN_CHARS=4000 # Min context budget
-# LUMAX_CTX_BACKOFF=0.5 # Shrink factor on failure
-# LUMAX_CTX_RECOVERY=2000 # Recovery step on success
-# LUMAX_CTX_MAX_RETRIES=3 # Max retry attempts
-# LUMAX_CTX_KEEP_LAST=6 # Messages to preserve at end
+# XRLF_CTX_MAX_CHARS=50000 # Max context budget in chars
+# XRLF_CTX_MIN_CHARS=4000 # Min context budget
+# XRLF_CTX_BACKOFF=0.5 # Shrink factor on failure
+# XRLF_CTX_RECOVERY=2000 # Recovery step on success
+# XRLF_CTX_MAX_RETRIES=3 # Max retry attempts
+# XRLF_CTX_KEEP_LAST=6 # Messages to preserve at end
 # ── Compression ──────────────────────────────────────────────
-# LUMAX_PROXY_AUTO_CHECKPOINT=true # Enable XRL checkpointing
+# XRLF_PROXY_AUTO_CHECKPOINT=true # Enable XRL checkpointing
 # FOVEA_COMPRESS_EVERY=6 # Turns between compressions
 # FOVEA_WINDOW=4 # Recent turns kept verbatim
 # FOVEA_SUMMARY_TOKENS=300 # Max tokens per checkpoint
 # ── Smart Router ─────────────────────────────────────────────
-# LUMAX_SMART_PROXY=true # Enable middleman routing
-# LUMAX_MIDDLEMAN_MODEL= # Model for compression/routing
-# LUMAX_MIDDLEMAN_GPU_OFFLOAD=0.2 # GPU offload for middleman
+# XRLF_SMART_PROXY=true # Enable middleman routing
+# XRLF_MIDDLEMAN_MODEL= # Model for compression/routing
+# XRLF_MIDDLEMAN_GPU_OFFLOAD=0.2 # GPU offload for middleman
 # ── Foveation ────────────────────────────────────────────────
-# LUMAX_PROXY_AGGRESSION=0 # 0=Auto, 1-6=Manual override
-# LUMAX_SPOOF_CONTEXT_WINDOW=128000 # Report larger window to clients
-# LUMAX_SAFE_MODE=false # Disable context spoofing
+# XRLF_PROXY_AGGRESSION=0 # 0=Auto, 1-6=Manual override
+# XRLF_SPOOF_CONTEXT_WINDOW=128000 # Report larger window to clients
+# XRLF_SAFE_MODE=false # Disable context spoofing
 
 
 Now let me check if there's an actual .env file that the proxy loads, and also check xrlf_config.yaml for any override settings. Let me also check the cognitive_steering.py to condition it.
@@ -268,7 +268,7 @@ Now let me check if there's an actual .env file that the proxy loads, and also c
 
 Cline wants to execute this command:
 Completed
-cd "c:\Users\danie\program\LUMAX\Tools\xrlf-model\foveated-memory" && if exist .env (echo .env EXISTS) else (echo .env NOT FOUND) & echo --- & findstr /i "XRLF_REPO_ENABLED XRLF_CONTEXT_OVERRIDE XRLF_CAPABILITY_OVERRIDE XRLF_FOVEATION_OVERRIDE LUMAX_COGNITIVE_MODE LUMAX_PROXY_MODEL FOVEA_PASSTHROUGH_MODE" .env 2>nul
+cd "c:\Users\danie\program\XRLF\Tools\xrlf-model\foveated-memory" && if exist .env (echo .env EXISTS) else (echo .env NOT FOUND) & echo --- & findstr /i "XRLF_REPO_ENABLED XRLF_CONTEXT_OVERRIDE XRLF_CAPABILITY_OVERRIDE XRLF_FOVEATION_OVERRIDE XRLF_COGNITIVE_MODE XRLF_PROXY_MODEL FOVEA_PASSTHROUGH_MODE" .env 2>nul
 .env NOT FOUND
 ---
 
@@ -309,7 +309,7 @@ xrlf_config.yaml · lines 1-40‎
 
 Cline wants to execute this command:
 Completed
-cd "c:\Users\danie\program\LUMAX\Tools\xrlf-model" && node --check foveated-memory/server.js 2>&1 && echo SYNTAX_OK && del _patch_server.cjs _patch_features.cjs _patch_features2.cjs _patch_runtime.cjs 2>nul && echo CLEANUP_DONE
+cd "c:\Users\danie\program\XRLF\Tools\xrlf-model" && node --check foveated-memory/server.js 2>&1 && echo SYNTAX_OK && del _patch_server.cjs _patch_features.cjs _patch_features2.cjs _patch_runtime.cjs 2>nul && echo CLEANUP_DONE
 SYNTAX_OK
 
 CLEANUP_DONE
@@ -320,7 +320,7 @@ Syntax is valid. Let me also verify the Python runtime syntax.
 
 Cline wants to execute this command:
 Completed
-cd "c:\Users\danie\program\LUMAX\Tools\xrlf-model" && python -c "import ast; ast.parse(open('runtime/xrlf_runtime.py', encoding='utf-8').read()); print('PY_SYNTAX_OK')" 2>&1
+cd "c:\Users\danie\program\XRLF\Tools\xrlf-model" && python -c "import ast; ast.parse(open('runtime/xrlf_runtime.py', encoding='utf-8').read()); print('PY_SYNTAX_OK')" 2>&1
 PY_SYNTAX_OK
 
 
@@ -329,7 +329,7 @@ Both syntax checks pass. Let me also verify run_xrlf.py doesn't set any hijackin
 
 Cline wants to execute this command:
 Completed
-cd "c:\Users\danie\program\LUMAX\Tools\xrlf-model" && findstr /i /n "XRLF_REPO_ENABLED XRLF_CONTEXT_OVERRIDE XRLF_CAPABILITY_OVERRIDE XRLF_FOVEATION_OVERRIDE LUMAX_COGNITIVE_MODE LUMAX_PROXY_MODEL FOVEA_PASSTHROUGH_MODE" run_xrlf.py xrl-info\fix\ overrides.txt 2>nul
+cd "c:\Users\danie\program\XRLF\Tools\xrlf-model" && findstr /i /n "XRLF_REPO_ENABLED XRLF_CONTEXT_OVERRIDE XRLF_CAPABILITY_OVERRIDE XRLF_FOVEATION_OVERRIDE XRLF_COGNITIVE_MODE XRLF_PROXY_MODEL FOVEA_PASSTHROUGH_MODE" run_xrlf.py xrl-info\fix\ overrides.txt 2>nul
 
 
 No hijacking env vars in run_xrlf.py or fix overrides.txt. Now let me do a final verification — run a quick simulation to confirm the reactor cold mode works correctly.
@@ -337,14 +337,14 @@ No hijacking env vars in run_xrlf.py or fix overrides.txt. Now let me do a final
 
 Cline wants to execute this command:
 Completed
-cd "c:\Users\danie\program\LUMAX\Tools\xrlf-model\foveated-memory" && node -e "require('dotenv').config(); const XRLF_REPO_ENABLED = (process.env.XRLF_REPO_ENABLED || 'false').toLowerCase().trim() === 'true'; const REPO_CONTEXT_OVERRIDE = (process.env.XRLF_CONTEXT_OVERRIDE || (XRLF_REPO_ENABLED ? 'true' : 'false')).toLowerCase().trim() === 'true'; const REPO_CAPABILITY_OVERRIDE = (process.env.XRLF_CAPABILITY_OVERRIDE || (XRLF_REPO_ENABLED ? 'true' : 'false')).toLowerCase().trim() === 'true'; const REPO_FOVEATION_OVERRIDE = (process.env.XRLF_FOVEATION_OVERRIDE || (XRLF_REPO_ENABLED ? 'true' : 'false')).toLowerCase().trim() === 'true'; console.log('XRLF_REPO_ENABLED:', XRLF_REPO_ENABLED); console.log('REPO_CONTEXT_OVERRIDE:', REPO_CONTEXT_OVERRIDE); console.log('REPO_CAPABILITY_OVERRIDE:', REPO_CAPABILITY_OVERRIDE); console.log('REPO_FOVEATION_OVERRIDE:', REPO_FOVEATION_OVERRIDE); console.log(XRLF_REPO_ENABLED ? 'REACTOR HOT' : 'REACTOR COLD - all overrides disabled');" 2>&1
+cd "c:\Users\danie\program\XRLF\Tools\xrlf-model\foveated-memory" && node -e "require('dotenv').config(); const XRLF_REPO_ENABLED = (process.env.XRLF_REPO_ENABLED || 'false').toLowerCase().trim() === 'true'; const REPO_CONTEXT_OVERRIDE = (process.env.XRLF_CONTEXT_OVERRIDE || (XRLF_REPO_ENABLED ? 'true' : 'false')).toLowerCase().trim() === 'true'; const REPO_CAPABILITY_OVERRIDE = (process.env.XRLF_CAPABILITY_OVERRIDE || (XRLF_REPO_ENABLED ? 'true' : 'false')).toLowerCase().trim() === 'true'; const REPO_FOVEATION_OVERRIDE = (process.env.XRLF_FOVEATION_OVERRIDE || (XRLF_REPO_ENABLED ? 'true' : 'false')).toLowerCase().trim() === 'true'; console.log('XRLF_REPO_ENABLED:', XRLF_REPO_ENABLED); console.log('REPO_CONTEXT_OVERRIDE:', REPO_CONTEXT_OVERRIDE); console.log('REPO_CAPABILITY_OVERRIDE:', REPO_CAPABILITY_OVERRIDE); console.log('REPO_FOVEATION_OVERRIDE:', REPO_FOVEATION_OVERRIDE); console.log(XRLF_REPO_ENABLED ? 'REACTOR HOT' : 'REACTOR COLD - all overrides disabled');" 2>&1
 node:internal/modules/cjs/loader:1479
   throw err;
   ^
 
 Error: Cannot find module 'dotenv'
 Require stack:
-- c:\Users\danie\program\LUMAX\Tools\xrlf-model\[eval]
+- c:\Users\danie\program\XRLF\Tools\xrlf-model\[eval]
     at Module._resolveFilename (node:internal/modules/cjs/loader:1476:15)
     at wrapResolveFilename (node:internal/modules/cjs/loader:1049:27)
     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1073:10)
@@ -356,19 +356,19 @@ Require stack:
     at [eval]:1:1
     at runScriptInThisContext (node:internal/vm:219:10) {
   code: 'MODULE_NOT_FOUND',
-  requireStack: [ 'c:\\Users\\danie\\program\\LUMAX\\Tools\\xrlf-model\\[eval]' ]
+  requireStack: [ 'c:\\Users\\danie\\program\\XRLF\\Tools\\xrlf-model\\[eval]' ]
 }
 
 Node.js v24.15.0
 
 Cline wants to execute this command:
 Completed
-cd "c:\Users\danie\program\LUMAX\Tools\xrlf-model\foveated-memory" && node -e "const fs=require('fs'); const envContent=fs.readFileSync('.env','utf8'); envContent.split('\n').forEach(line=>{line=line.trim(); if(!line||line.startsWith('#'))return; const idx=line.indexOf('='); if(idx>0){const k=line.slice(0,idx).trim();const v=line.slice(idx+1).trim(); process.env[k]=v;}}); const XRLF_REPO_ENABLED=(process.env.XRLF_REPO_ENABLED||'false').toLowerCase().trim()==='true'; const REPO_CONTEXT_OVERRIDE=(process.env.XRLF_CONTEXT_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; const REPO_CAPABILITY_OVERRIDE=(process.env.XRLF_CAPABILITY_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; const REPO_FOVEATION_OVERRIDE=(process.env.XRLF_FOVEATION_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; console.log('XRLF_REPO_ENABLED:',XRLF_REPO_ENABLED); console.log('REPO_CONTEXT_OVERRIDE:',REPO_CONTEXT_OVERRIDE); console.log('REPO_CAPABILITY_OVERRIDE:',REPO_CAPABILITY_OVERRIDE); console.log('REPO_FOVEATION_OVERRIDE:',REPO_FOVEATION_OVERRIDE); console.log(XRLF_REPO_ENABLED?'REACTOR HOT':'REACTOR COLD - all overrides disabled');" 2>&1
+cd "c:\Users\danie\program\XRLF\Tools\xrlf-model\foveated-memory" && node -e "const fs=require('fs'); const envContent=fs.readFileSync('.env','utf8'); envContent.split('\n').forEach(line=>{line=line.trim(); if(!line||line.startsWith('#'))return; const idx=line.indexOf('='); if(idx>0){const k=line.slice(0,idx).trim();const v=line.slice(idx+1).trim(); process.env[k]=v;}}); const XRLF_REPO_ENABLED=(process.env.XRLF_REPO_ENABLED||'false').toLowerCase().trim()==='true'; const REPO_CONTEXT_OVERRIDE=(process.env.XRLF_CONTEXT_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; const REPO_CAPABILITY_OVERRIDE=(process.env.XRLF_CAPABILITY_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; const REPO_FOVEATION_OVERRIDE=(process.env.XRLF_FOVEATION_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; console.log('XRLF_REPO_ENABLED:',XRLF_REPO_ENABLED); console.log('REPO_CONTEXT_OVERRIDE:',REPO_CONTEXT_OVERRIDE); console.log('REPO_CAPABILITY_OVERRIDE:',REPO_CAPABILITY_OVERRIDE); console.log('REPO_FOVEATION_OVERRIDE:',REPO_FOVEATION_OVERRIDE); console.log(XRLF_REPO_ENABLED?'REACTOR HOT':'REACTOR COLD - all overrides disabled');" 2>&1
 node:fs:441
     return binding.readFileUtf8(path, stringToFlags(options.flag));
                    ^
 
-Error: ENOENT: no such file or directory, open 'c:\Users\danie\program\LUMAX\Tools\xrlf-model\.env'
+Error: ENOENT: no such file or directory, open 'c:\Users\danie\program\XRLF\Tools\xrlf-model\.env'
     at Object.readFileSync (node:fs:441:20)
     at [eval]:1:45
     at runScriptInThisContext (node:internal/vm:219:10)
@@ -381,14 +381,14 @@ Error: ENOENT: no such file or directory, open 'c:\Users\danie\program\LUMAX\Too
   errno: -4058,
   code: 'ENOENT',
   syscall: 'open',
-  path: 'c:\\Users\\danie\\program\\LUMAX\\Tools\\xrlf-model\\.env'
+  path: 'c:\\Users\\danie\\program\\XRLF\\Tools\\xrlf-model\\.env'
 }
 
 Node.js v24.15.0
 
 Cline wants to execute this command:
 Completed
-cd "c:\Users\danie\program\LUMAX\Tools\xrlf-model\foveated-memory" && node -e "const fs=require('fs'); const envContent=fs.readFileSync('c:/Users/danie/program/LUMAX/Tools/xrlf-model/foveated-memory/.env','utf8'); envContent.split('\n').forEach(line=>{line=line.trim(); if(!line||line.startsWith('#'))return; const idx=line.indexOf('='); if(idx>0){const k=line.slice(0,idx).trim();const v=line.slice(idx+1).trim(); process.env[k]=v;}}); const XRLF_REPO_ENABLED=(process.env.XRLF_REPO_ENABLED||'false').toLowerCase().trim()==='true'; const REPO_CONTEXT_OVERRIDE=(process.env.XRLF_CONTEXT_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; const REPO_CAPABILITY_OVERRIDE=(process.env.XRLF_CAPABILITY_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; const REPO_FOVEATION_OVERRIDE=(process.env.XRLF_FOVEATION_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; console.log('XRLF_REPO_ENABLED:',XRLF_REPO_ENABLED); console.log('REPO_CONTEXT_OVERRIDE:',REPO_CONTEXT_OVERRIDE); console.log('REPO_CAPABILITY_OVERRIDE:',REPO_CAPABILITY_OVERRIDE); console.log('REPO_FOVEATION_OVERRIDE:',REPO_FOVEATION_OVERRIDE); console.log(XRLF_REPO_ENABLED?'REACTOR HOT':'REACTOR COLD - all overrides disabled');" 2>&1
+cd "c:\Users\danie\program\XRLF\Tools\xrlf-model\foveated-memory" && node -e "const fs=require('fs'); const envContent=fs.readFileSync('c:/Users/danie/program/XRLF/Tools/xrlf-model/foveated-memory/.env','utf8'); envContent.split('\n').forEach(line=>{line=line.trim(); if(!line||line.startsWith('#'))return; const idx=line.indexOf('='); if(idx>0){const k=line.slice(0,idx).trim();const v=line.slice(idx+1).trim(); process.env[k]=v;}}); const XRLF_REPO_ENABLED=(process.env.XRLF_REPO_ENABLED||'false').toLowerCase().trim()==='true'; const REPO_CONTEXT_OVERRIDE=(process.env.XRLF_CONTEXT_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; const REPO_CAPABILITY_OVERRIDE=(process.env.XRLF_CAPABILITY_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; const REPO_FOVEATION_OVERRIDE=(process.env.XRLF_FOVEATION_OVERRIDE||(XRLF_REPO_ENABLED?'true':'false')).toLowerCase().trim()==='true'; console.log('XRLF_REPO_ENABLED:',XRLF_REPO_ENABLED); console.log('REPO_CONTEXT_OVERRIDE:',REPO_CONTEXT_OVERRIDE); console.log('REPO_CAPABILITY_OVERRIDE:',REPO_CAPABILITY_OVERRIDE); console.log('REPO_FOVEATION_OVERRIDE:',REPO_FOVEATION_OVERRIDE); console.log(XRLF_REPO_ENABLED?'REACTOR HOT':'REACTOR COLD - all overrides disabled');" 2>&1
 XRLF_REPO_ENABLED: false
 
 REPO_CONTEXT_OVERRIDE: false
@@ -402,7 +402,7 @@ All verifications pass. The reactor is cold, all overrides are disabled. Let me 
 
 Cline wants to execute this command:
 Completed
-cd "c:\Users\danie\program\LUMAX\Tools\xrlf-model" && del _patch_server.cjs 2>nul & echo done
+cd "c:\Users\danie\program\XRLF\Tools\xrlf-model" && del _patch_server.cjs 2>nul & echo done
 done
 
 Task Completed
@@ -446,12 +446,12 @@ To re-enable repo features for testing later, set XRLF_REPO_ENABLED=true in .env
 
 Cline wants to execute this command:
 Completed
-cd "c:\Users\danie\program\LUMAX\Tools\xrlf-model\foveated-memory" && node -e "const fs=require('fs'); const c=fs.readFileSync('.env','utf8'); console.log(c)"
+cd "c:\Users\danie\program\XRLF\Tools\xrlf-model\foveated-memory" && node -e "const fs=require('fs'); const c=fs.readFileSync('.env','utf8'); console.log(c)"
 node:fs:441
     return binding.readFileUtf8(path, stringToFlags(options.flag));
                    ^
 
-Error: ENOENT: no such file or directory, open 'c:\Users\danie\program\LUMAX\Tools\xrlf-model\.env'
+Error: ENOENT: no such file or directory, open 'c:\Users\danie\program\XRLF\Tools\xrlf-model\.env'
     at Object.readFileSync (node:fs:441:20)
     at [eval]:1:36
     at runScriptInThisContext (node:internal/vm:219:10)
@@ -464,7 +464,7 @@ Error: ENOENT: no such file or directory, open 'c:\Users\danie\program\LUMAX\Too
   errno: -4058,
   code: 'ENOENT',
   syscall: 'open',
-  path: 'c:\\Users\\danie\\program\\LUMAX\\Tools\\xrlf-model\\.env'
+  path: 'c:\\Users\\danie\\program\\XRLF\\Tools\\xrlf-model\\.env'
 }
 
 Node.js v24.15.0

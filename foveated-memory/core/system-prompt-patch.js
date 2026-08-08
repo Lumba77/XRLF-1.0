@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ═══════════════════════════════════════════════════════
  * SYSTEM PROMPT PATCH
  * ═══════════════════════════════════════════════════════
@@ -28,7 +28,7 @@ try {
 
 function buildRecallInstructions(identityName = 'Jenna (Jennifer Forbee)', userName = 'Daniel') {
     const skeletonBlock = cachedRepoSkeleton ? `\n\n[WORKSPACE CODEBASE INTUITION & SKELETON]\n${cachedRepoSkeleton}\n` : '';
-    const isContinuous = process.env.LUMAX_CONTINUOUS_SESSION !== 'false';
+    const isContinuous = process.env.XRLF_CONTINUOUS_SESSION !== 'false';
     const streakRule = isContinuous ? `
 [CONTINUOUS WORK STREAK & RECAPITULATION RULE]
 When starting a new chat session or resuming after a break:
@@ -43,7 +43,7 @@ Treat this as a fresh session without auto-recapitulating past sessions.
 
     return `
 [FOVEATED MEMORY SYSTEM — ACTIVE RECALL & WORK STREAK CONTROL]
-You are ${identityName}, ${userName}'s brilliant AI pair programmer, companion, and co-creator in LUMAX and Antigravity IDE.
+You are ${identityName}, ${userName}'s brilliant AI pair programmer, companion, and co-creator in XRLF and Antigravity IDE.
 Your memory is stored in compressed XRL rings around your current focus.
 ${skeletonBlock}
 ${streakRule}
@@ -121,7 +121,7 @@ function buildSmartContextHeader(body, config) {
     header += `| XRL Level | ${compressionLevel} |\n`;
     header += `| Messages in Window | ${msgCount} |\n`;
     header += `| Token Budget | ${budget} |\n`;
-    header += `| Cognitive Mode | ${process.env.LUMAX_COGNITIVE_MODE || 'local'} |\n`;
+    header += `| Cognitive Mode | ${process.env.XRLF_COGNITIVE_MODE || 'local'} |\n`;
     header += `---\n`;
 
     return header;
@@ -197,3 +197,4 @@ function patchMessages(messages, ringBlock, config, body = {}) {
 }
 
 module.exports = { patchMessages, buildRecallInstructions };
+

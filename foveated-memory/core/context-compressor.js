@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ═══════════════════════════════════════════════════════
  * XRL CONTEXT CHECKPOINTER
  * ═══════════════════════════════════════════════════════
@@ -58,7 +58,7 @@ async function summarizeWithLMStudio(messages) {
     ).join('\n\n');
 
     try {
-        const COMPRESS_MODEL = process.env.LUMAX_MIDDLEMAN_MODEL || process.env.LOCAL_LLM_MODEL || process.env.LUMAX_MODEL_LOCAL_ID || 'qwopus3.5-9b-coder-mtp-moq';
+        const COMPRESS_MODEL = process.env.XRLF_MIDDLEMAN_MODEL || process.env.LOCAL_LLM_MODEL || process.env.XRLF_MODEL_LOCAL_ID || 'qwopus3.5-9b-coder-mtp-moq';
         const res = await fetch(`${LM_STUDIO_URL}/v1/chat/completions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -243,3 +243,4 @@ function listCheckpoints() {
 }
 
 module.exports = { compressContext, expandCheckpoint, listCheckpoints };
+

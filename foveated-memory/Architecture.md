@@ -1,4 +1,4 @@
-### Architecture
+﻿### Architecture
 
 
 
@@ -112,7 +112,7 @@ What's verified working:
 
 powershell
 
-\# In LUMAX/Tools/foveated-memory/
+\# In XRLF/Tools/foveated-memory/
 
 node server.js
 
@@ -125,4 +125,5 @@ http://localhost:8200
 
 
 Every model you load in LM Studio now gets the foveated ring block injected at session start and full [recall:](recall:) active memory on every turn. The workspace's memory persists permanently to ./memory\_data/default/memory.db
+
 

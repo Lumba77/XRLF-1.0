@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LUMAX Concordia Settings Panel</title>
+  <title>XRLF Concordia Settings Panel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
 </head>
 <body>
   <header>
-    <h1>⚙️ LUMAX Concordia Settings</h1>
+    <h1>⚙️ XRLF Concordia Settings</h1>
     <div class="status">
       <button onclick="openPage('/graphtest.html')" class="pill pill-accent">📊 Dual Proxy Graph Test</button>
       <span id="proxyStatus" class="pill offline">Proxy: checking…</span>
@@ -54,8 +54,8 @@
         <h2>📱 UI Shell Preference</h2>
         <div class="row"><label>Active Desktop UI</label>
           <div class="btn-grid">
-            <button id="shellCorner" onclick="toggleSetting('LUMAX_UI_SHELL', 'corner'); call('open-corner-companion');">Corner Companion (Bottom-Right)</button>
-            <button id="shellTopBar" onclick="toggleSetting('LUMAX_UI_SHELL', 'topbar'); call('open-topbar');">TopBar (Top Edge)</button>
+            <button id="shellCorner" onclick="toggleSetting('XRLF_UI_SHELL', 'corner'); call('open-corner-companion');">Corner Companion (Bottom-Right)</button>
+            <button id="shellTopBar" onclick="toggleSetting('XRLF_UI_SHELL', 'topbar'); call('open-topbar');">TopBar (Top Edge)</button>
           </div>
         </div>
       </section>
@@ -76,14 +76,14 @@
       <section class="card">
         <h2>🤖 Main Project Model & Engine Settings</h2>
         <div class="row"><label for="mainProjectModel">Main LLM Model</label>
-          <select id="mainProjectModel" aria-label="Main LLM Model" onchange="toggleSetting('LUMAX_MODEL_LOCAL_ID', this.value)">
+          <select id="mainProjectModel" aria-label="Main LLM Model" onchange="toggleSetting('XRLF_MODEL_LOCAL_ID', this.value)">
             <option value="qwopus3.5-9b-coder-mtp-moq">🚀 QwOpus 3.5 9B Coder MTP MoQ (Deep Coder - Ultra Fast)</option>
             <option value="qwen3.5-4b-moq">⚡ Qwen MoQ 4B + MTP (1.88GB VRAM - Ultra Fast 32K Context)</option>
             <option value="w-ahmad/gemma-4-12b-it-qat-gguf-moq/moq-3.5.gguf">🧠 Gemma 4 12B MoQ (5.0GB VRAM - Deep Reasoning)</option>
           </select>
         </div>
         <div class="row"><label for="mainEngineProvider">Main Engine Provider</label>
-          <select id="mainEngineProvider" aria-label="Main Engine Provider" onchange="toggleSetting('LUMAX_LLM_PROVIDER', this.value)">
+          <select id="mainEngineProvider" aria-label="Main Engine Provider" onchange="toggleSetting('XRLF_LLM_PROVIDER', this.value)">
             <option value="lmstudio">LM Studio Local Server (:7272)</option>
             <option value="ollama">Ollama Local Server (:11434)</option>
             <option value="unsloth">Unsloth Worker (:8888)</option>
@@ -92,8 +92,8 @@
         </div>
         <div class="row"><label>Model Thinking / Reasoning</label>
           <div class="btn-grid">
-            <button id="thinkOff" onclick="toggleSetting('LUMAX_MODEL_THINKING', 'false')">Instruct (Fast)</button>
-            <button id="thinkOn" onclick="toggleSetting('LUMAX_MODEL_THINKING', 'true')">Reasoning</button>
+            <button id="thinkOff" onclick="toggleSetting('XRLF_MODEL_THINKING', 'false')">Instruct (Fast)</button>
+            <button id="thinkOn" onclick="toggleSetting('XRLF_MODEL_THINKING', 'true')">Reasoning</button>
           </div>
         </div>
       </section>
@@ -101,10 +101,10 @@
       <!-- Smart Router & Proxy Model Settings -->
       <section class="card">
         <h2>⚡ Smart Router & Foveated Memory Proxy</h2>
-        <div class="row"><label>Smart Context Router</label><div class="btn-grid"><button id="smartRouterOn" onclick="toggleSetting('LUMAX_SMART_PROXY', 'true')">On</button><button id="smartRouterOff" onclick="toggleSetting('LUMAX_SMART_PROXY', 'false')">Off</button></div></div>
-        <div class="row"><label>XRL Auto-Checkpoint</label><div class="btn-grid"><button id="autoCkpOn" onclick="toggleSetting('LUMAX_PROXY_AUTO_CHECKPOINT', 'true')">On (8 Turns)</button><button id="autoCkpOff" onclick="toggleSetting('LUMAX_PROXY_AUTO_CHECKPOINT', 'false')">Off</button></div></div>
+        <div class="row"><label>Smart Context Router</label><div class="btn-grid"><button id="smartRouterOn" onclick="toggleSetting('XRLF_SMART_PROXY', 'true')">On</button><button id="smartRouterOff" onclick="toggleSetting('XRLF_SMART_PROXY', 'false')">Off</button></div></div>
+        <div class="row"><label>XRL Auto-Checkpoint</label><div class="btn-grid"><button id="autoCkpOn" onclick="toggleSetting('XRLF_PROXY_AUTO_CHECKPOINT', 'true')">On (8 Turns)</button><button id="autoCkpOff" onclick="toggleSetting('XRLF_PROXY_AUTO_CHECKPOINT', 'false')">Off</button></div></div>
         <div class="row"><label for="compressorModel">Proxy Summarizer Model</label>
-          <select id="compressorModel" aria-label="Proxy Summarizer Model" onchange="toggleSetting('LUMAX_COMPRESSOR_MODEL', this.value)">
+          <select id="compressorModel" aria-label="Proxy Summarizer Model" onchange="toggleSetting('XRLF_COMPRESSOR_MODEL', this.value)">
             <option value="qwen3.5-4b-abliterated">qwen3.5-4b-abliterated (Fast 4B Summarizer)</option>
             <option value="smart-router_gguf">smart-router_gguf (800MB Light Router)</option>
           </select>
@@ -206,7 +206,7 @@
         const r = await fetch(`${API}/api/setting`, {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({key: 'LUMAX_FRONTEND_UI_PRESET', val: ui})
+          body: JSON.stringify({key: 'XRLF_FRONTEND_UI_PRESET', val: ui})
         });
         const txt = await r.text();
         log(`Frontend => ${ui} (${r.status}) ${txt}`);
@@ -272,7 +272,7 @@
 
     async function togglePtt(enabled) {
       log(`Setting Push-to-Talk = ${enabled}`);
-      toggleSetting('LUMAX_MIC_PTT', enabled ? 'true' : 'false');
+      toggleSetting('XRLF_MIC_PTT', enabled ? 'true' : 'false');
       document.getElementById('pttModeOn').classList.toggle('active', enabled);
       document.getElementById('pttModeOff').classList.toggle('active', !enabled);
     }
@@ -292,33 +292,33 @@
         const r = await fetch(`${API}/api/env`);
         if (!r.ok) throw new Error('not ok');
         const e = await r.json();
-        document.getElementById('cap').value = e.LUMAX_CLOUD_MAX_TOKENS_CAP || 0;
-        document.getElementById('preserve').value = e.LUMAX_CLOUD_PRESERVE_LAST || 10;
-        document.getElementById('fovea').value = e.LUMAX_PROXY_AGGRESSION || 0;
+        document.getElementById('cap').value = e.XRLF_CLOUD_MAX_TOKENS_CAP || 0;
+        document.getElementById('preserve').value = e.XRLF_CLOUD_PRESERVE_LAST || 10;
+        document.getElementById('fovea').value = e.XRLF_PROXY_AGGRESSION || 0;
         
         const mainModelEl = document.getElementById('mainProjectModel');
-        if (mainModelEl) mainModelEl.value = e.LUMAX_MODEL_LOCAL_ID || 'qwopus3.5-9b-coder-mtp-moq';
+        if (mainModelEl) mainModelEl.value = e.XRLF_MODEL_LOCAL_ID || 'qwopus3.5-9b-coder-mtp-moq';
         
         const mainProviderEl = document.getElementById('mainEngineProvider');
-        if (mainProviderEl) mainProviderEl.value = e.LUMAX_LLM_PROVIDER || 'lmstudio';
+        if (mainProviderEl) mainProviderEl.value = e.XRLF_LLM_PROVIDER || 'lmstudio';
 
         const compModelEl = document.getElementById('compressorModel');
-        if (compModelEl) compModelEl.value = e.LUMAX_COMPRESSOR_MODEL || 'qwen3.5-4b-abliterated';
+        if (compModelEl) compModelEl.value = e.XRLF_COMPRESSOR_MODEL || 'qwen3.5-4b-abliterated';
 
-        updateRoute((e.LUMAX_COGNITIVE_MODE || 'local') === 'cloud' ? 'cloud' : 'local');
-        updateFrontend((e.LUMAX_FRONTEND_UI || '3d_avatar').toLowerCase());
-        updateToggleButtons('voice', (e.LUMAX_VOICE_ENABLED || '').toLowerCase() === 'true');
-        updateToggleButtons('mic', (e.LUMAX_MIC_ENABLED || '').toLowerCase() === 'true');
-        document.getElementById('pttModeOn').classList.toggle('active', (e.LUMAX_MIC_PTT || '').toLowerCase() === 'true');
-        document.getElementById('pttModeOff').classList.toggle('active', (e.LUMAX_MIC_PTT || '').toLowerCase() !== 'true');
-        document.getElementById('thinkOn').classList.toggle('active', (e.LUMAX_MODEL_THINKING || '').toLowerCase() === 'true');
-        document.getElementById('thinkOff').classList.toggle('active', (e.LUMAX_MODEL_THINKING || '').toLowerCase() === 'false');
-        document.getElementById('smartRouterOn').classList.toggle('active', (e.LUMAX_SMART_PROXY || '').toLowerCase() === 'true');
-        document.getElementById('smartRouterOff').classList.toggle('active', (e.LUMAX_SMART_PROXY || '').toLowerCase() === 'false');
-        document.getElementById('autoCkpOn').classList.toggle('active', (e.LUMAX_PROXY_AUTO_CHECKPOINT || '').toLowerCase() !== 'false');
-        document.getElementById('autoCkpOff').classList.toggle('active', (e.LUMAX_PROXY_AUTO_CHECKPOINT || '').toLowerCase() === 'false');
-        document.getElementById('shellCorner').classList.toggle('active', (e.LUMAX_UI_SHELL || 'corner').toLowerCase() === 'corner');
-        document.getElementById('shellTopBar').classList.toggle('active', (e.LUMAX_UI_SHELL || '').toLowerCase() === 'topbar');
+        updateRoute((e.XRLF_COGNITIVE_MODE || 'local') === 'cloud' ? 'cloud' : 'local');
+        updateFrontend((e.XRLF_FRONTEND_UI || '3d_avatar').toLowerCase());
+        updateToggleButtons('voice', (e.XRLF_VOICE_ENABLED || '').toLowerCase() === 'true');
+        updateToggleButtons('mic', (e.XRLF_MIC_ENABLED || '').toLowerCase() === 'true');
+        document.getElementById('pttModeOn').classList.toggle('active', (e.XRLF_MIC_PTT || '').toLowerCase() === 'true');
+        document.getElementById('pttModeOff').classList.toggle('active', (e.XRLF_MIC_PTT || '').toLowerCase() !== 'true');
+        document.getElementById('thinkOn').classList.toggle('active', (e.XRLF_MODEL_THINKING || '').toLowerCase() === 'true');
+        document.getElementById('thinkOff').classList.toggle('active', (e.XRLF_MODEL_THINKING || '').toLowerCase() === 'false');
+        document.getElementById('smartRouterOn').classList.toggle('active', (e.XRLF_SMART_PROXY || '').toLowerCase() === 'true');
+        document.getElementById('smartRouterOff').classList.toggle('active', (e.XRLF_SMART_PROXY || '').toLowerCase() === 'false');
+        document.getElementById('autoCkpOn').classList.toggle('active', (e.XRLF_PROXY_AUTO_CHECKPOINT || '').toLowerCase() !== 'false');
+        document.getElementById('autoCkpOff').classList.toggle('active', (e.XRLF_PROXY_AUTO_CHECKPOINT || '').toLowerCase() === 'false');
+        document.getElementById('shellCorner').classList.toggle('active', (e.XRLF_UI_SHELL || 'corner').toLowerCase() === 'corner');
+        document.getElementById('shellTopBar').classList.toggle('active', (e.XRLF_UI_SHELL || '').toLowerCase() === 'topbar');
         document.getElementById('tunnelTarget').textContent = e.VITE_URL || '—';
         log('Loaded current .env values cleanly');
       } catch (err) {
@@ -366,3 +366,4 @@
   </script>
 </body>
 </html>
+

@@ -1,4 +1,4 @@
-# XRLF Model & Protocol — Credits & Acknowledgements
+﻿# XRLF Model & Protocol — Credits & Acknowledgements
 
 ## Inspirations & Prior Art
 
@@ -29,4 +29,5 @@ Thank you for inspiring us to push this research further.
 ---
 
 ## Project
-**XRLF (Extended Reasoning Language Framework)** is developed as part of the **LUMAX Diamond Concordia** project.
+**XRLF (Extended Reasoning Language Framework)** is developed as part of the **XRLF Diamond Concordia** project.
+

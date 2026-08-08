@@ -23,7 +23,7 @@ memory:
 tts:
   enabled: true
   engine: auto            # provider selection: http → kokoro → piper → espeak → stub
-  provider: http          # portable default: use the Lumax TTS service if available
+  provider: http          # portable default: use the XRLF TTS service if available
   endpoint: http://127.0.0.1:8004/tts
   voice: default
   fallback:
@@ -38,3 +38,4 @@ gguf_source: ""          # Set to your local GGUF path, e.g. C:/path/to/your/mod
 
 # Embed existing foveated memory DB (accumulated conversations)
 memory_db_source: "foveated-memory/memory_data/default/memory.db"   # auto-created on first run
+

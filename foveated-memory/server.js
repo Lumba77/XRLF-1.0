@@ -19,7 +19,7 @@
 // ── Inline .env loader (no external dependency) ──────────────────────
 // NSSM services don't auto-load .env files, so we do it manually.
 // Loads ONLY the local .env in this directory — the xrlf-model proxy is
-// fully self-contained and does NOT read from the parent LUMAX .env.
+// fully self-contained and does NOT read from the parent XRLF .env.
 (function loadEnv() {
     const fs = require('fs');
     const path = require('path');
@@ -207,18 +207,18 @@ function dedupeFileReads(messages) {
     });
 }
 
-// Hard upstream token cap (port of LUMAX_CLOUD_MAX_TOKENS_CAP from 8103 proxy)
+// Hard upstream token cap (port of XRLF_CLOUD_MAX_TOKENS_CAP from 8103 proxy)
 // If env cap is set explicitly, use it; otherwise derive from model context window.
-const CLOUD_MAX_TOKENS_CAP = parseInt(process.env.LUMAX_CLOUD_MAX_TOKENS_CAP || '0', 10);
-const PRESERVE_LAST_TURNS  = parseInt(process.env.LUMAX_CLOUD_PRESERVE_LAST  || '10', 10);
+const CLOUD_MAX_TOKENS_CAP = parseInt(process.env.XRLF_CLOUD_MAX_TOKENS_CAP || '0', 10);
+const PRESERVE_LAST_TURNS  = parseInt(process.env.XRLF_CLOUD_PRESERVE_LAST  || '10', 10);
 
 // ── Context Window Spoofing ────────────────────────────────────────────────
 // Reports a large context window to clients (Papillon, Cline, VS Code Copilot)
 // while the proxy operates at a much smaller real window via XRL checkpointing.
-// Set LUMAX_SPOOF_CONTEXT_WINDOW=128000 to tell clients they have 128K available.
-// Set LUMAX_SAFE_MODE=true to disable spoofing and report real context windows.
-const SPOOF_CONTEXT_WINDOW = parseInt(process.env.LUMAX_SPOOF_CONTEXT_WINDOW || '0', 10);
-const SAFE_MODE = process.env.LUMAX_SAFE_MODE === 'true' || process.env.LUMAX_SAFE_MODE === '1';
+// Set XRLF_SPOOF_CONTEXT_WINDOW=128000 to tell clients they have 128K available.
+// Set XRLF_SAFE_MODE=true to disable spoofing and report real context windows.
+const SPOOF_CONTEXT_WINDOW = parseInt(process.env.XRLF_SPOOF_CONTEXT_WINDOW || '0', 10);
+const SAFE_MODE = process.env.XRLF_SAFE_MODE === 'true' || process.env.XRLF_SAFE_MODE === '1';
 
 function getCloudCapForModel(modelName) {
     if (CLOUD_MAX_TOKENS_CAP > 0) return CLOUD_MAX_TOKENS_CAP;
@@ -291,7 +291,7 @@ function expandFileLine(filepath, lineNum, contextLines = 3) {
 
 // XRL-style atomic cache (tiny in-memory registry for expansion requests)
 const xrlCache = new Map();
-const XRL_NAMESPACE = 'lumax';
+const XRL_NAMESPACE = 'XRLF';
 function generateXrl(filepath, line, content) {
     const hash = require('crypto').createHash('sha256').update(`${filepath}:${line}:${content}`).digest('hex').slice(0, 6);
     const uri = `xrl://${XRL_NAMESPACE}/${filepath}:${line}:${hash}`;
@@ -347,28 +347,28 @@ if (process.env.XRLF_PROXY_PORT) {
 }
 
 // ── Cloud-Aware Upstream Routing ─────────────────────────────────────────────
-// When LUMAX_COGNITIVE_MODE=cloud, override upstream to Ollama Cloud with API key.
+// When XRLF_COGNITIVE_MODE=cloud, override upstream to Ollama Cloud with API key.
 // Compression checkpoints (context-compressor.js) stay local on LM Studio — hybrid routing.
-const COGNITIVE_MODE = (process.env.LUMAX_COGNITIVE_MODE || 'local').toLowerCase();
-const OLLAMA_CLOUD_URL = process.env.LUMAX_PROXY_TARGET || 'https://ollama.com/v1';
-const OLLAMA_API_KEY = process.env.LUMAX_PROXY_API_KEY || process.env.OLLAMA_API_KEY || '';
+const COGNITIVE_MODE = (process.env.XRLF_COGNITIVE_MODE || 'local').toLowerCase();
+const OLLAMA_CLOUD_URL = process.env.XRLF_PROXY_TARGET || 'https://ollama.com/v1';
+const OLLAMA_API_KEY = process.env.XRLF_PROXY_API_KEY || process.env.OLLAMA_API_KEY || '';
 
 // ── LM Studio Auto-Start (for local compression) ─────────────────────────────
 // In cloud mode, chat completions go to Ollama Cloud, but compression checkpoints
 // still use local LM Studio. If LM Studio is offline, auto-start it headlessly
 // with the Qwen3.5-4B middleman model at 20% GPU offload.
 const LM_STUDIO_URL = process.env.LM_STUDIO_URL || process.env.LOCAL_LLM_BASE || 'http://127.0.0.1:7272';
-const MIDDLEMAN_MODEL = process.env.LUMAX_MIDDLEMAN_MODEL || process.env.LOCAL_LLM_MODEL || 'qwen3.5-4b-abliterated';
-const MIDDLEMAN_GPU_OFFLOAD = process.env.LUMAX_MIDDLEMAN_GPU_OFFLOAD || '0.2';
-const MIDDLEMAN_CONTEXT_LENGTH = process.env.LUMAX_MIDDLEMAN_CONTEXT_LENGTH || '8192';
+const MIDDLEMAN_MODEL = process.env.XRLF_MIDDLEMAN_MODEL || process.env.LOCAL_LLM_MODEL || 'qwen3.5-4b-abliterated';
+const MIDDLEMAN_GPU_OFFLOAD = process.env.XRLF_MIDDLEMAN_GPU_OFFLOAD || '0.2';
+const MIDDLEMAN_CONTEXT_LENGTH = process.env.XRLF_MIDDLEMAN_CONTEXT_LENGTH || '8192';
 
 // ── Upstream Model Override ────────────────────────────────────────────────────
 // The proxy receives `model: "auto"` from clients like Cline, which upstreams
 // (LM Studio / Ollama Cloud) cannot resolve. Override with an explicit model name.
-// Priority: LUMAX_PROXY_MODEL env > MIDDLEMAN_MODEL (local) > hardcoded default.
+// Priority: XRLF_PROXY_MODEL env > MIDDLEMAN_MODEL (local) > hardcoded default.
 // In cloud mode, the default is 'kimi-k2.7-code' (a confirmed available Ollama Cloud model).
 // In local mode, the default is MIDDLEMAN_MODEL (the LM Studio loaded model).
-const UPSTREAM_MODEL = process.env.LUMAX_PROXY_MODEL || (COGNITIVE_MODE === 'cloud' ? (process.env.LUMAX_MODEL_CLOUD_ID || 'kimi-k2.7-code') : (process.env.LUMAX_MODEL_LOCAL_ID || process.env.LOCAL_LLM_MODEL || MIDDLEMAN_MODEL));
+const UPSTREAM_MODEL = process.env.XRLF_PROXY_MODEL || (COGNITIVE_MODE === 'cloud' ? (process.env.XRLF_MODEL_CLOUD_ID || 'kimi-k2.7-code') : (process.env.XRLF_MODEL_LOCAL_ID || process.env.LOCAL_LLM_MODEL || MIDDLEMAN_MODEL));
 
 let _lmStudioStarting = false;
 
@@ -554,7 +554,7 @@ const handleIdeDetect = (req, res) => {
     });
 };
 
-const handleLumaxDispatch = async (req, res) => {
+const handleXRLFDispatch = async (req, res) => {
     const { prompt } = req.body || {};
     if (!prompt) return res.status(400).json({ error: 'prompt is required' });
 
@@ -572,15 +572,15 @@ const handleLumaxDispatch = async (req, res) => {
         };
         await handleChatCompletion(fakeReq, res, null, reqStore, workspaceId);
     } catch (err) {
-        console.error('[LumaxDispatch] Error dispatching prompt to Lumax core:', err);
-        if (!res.headersSent) res.status(500).json({ error: `Failed to dispatch prompt to LUMAX Agent: ${err.message}` });
+        console.error('[XRLFDispatch] Error dispatching prompt to XRLF core:', err);
+        if (!res.headersSent) res.status(500).json({ error: `Failed to dispatch prompt to FoveAI Agent: ${err.message}` });
     }
 };
 
 dashboardApp.get('/api/ide/detect', handleIdeDetect);
 app.get('/api/ide/detect', handleIdeDetect);
-dashboardApp.post('/api/lumax/dispatch', handleLumaxDispatch);
-app.post('/api/lumax/dispatch', handleLumaxDispatch);
+dashboardApp.post('/api/XRLF/dispatch', handleXRLFDispatch);
+app.post('/api/XRLF/dispatch', handleXRLFDispatch);
 
 // Context Healer endpoints on dashboard port too
 dashboardApp.get('/api/context/health', (req, res) => res.json(getHealerState()));
@@ -729,10 +729,10 @@ function scaleConfigForModel(modelName, baseConfig) {
         label = "Micro (Dense Retina)";
     }
 
-    // ── Manual Foveation Level Override (LUMAX_PROXY_AGGRESSION) ──────────────
-    // If LUMAX_PROXY_AGGRESSION is set to 1-6, override the auto-detected multiplier
+    // ── Manual Foveation Level Override (XRLF_PROXY_AGGRESSION) ──────────────
+    // If XRLF_PROXY_AGGRESSION is set to 1-6, override the auto-detected multiplier
     // Level 0=Auto (model-detected), 1=Max Compression, 2=Standard, 3=Moderate, 4=Light, 5=Minimal, 6=Almost Raw
-    const aggressionLevel = parseInt(process.env.LUMAX_PROXY_AGGRESSION || '0', 10);
+    const aggressionLevel = parseInt(process.env.XRLF_PROXY_AGGRESSION || '0', 10);
     const aggressionMap = { 1: 0.32, 2: 1.0, 3: 2.0, 4: 4.0, 5: 10.0, 6: 25.0 };
     const aggressionLabels = {
         1: "L1 Max Compression (x0.32)",
@@ -745,7 +745,7 @@ function scaleConfigForModel(modelName, baseConfig) {
     if (aggressionLevel >= 1 && aggressionLevel <= 6 && aggressionMap[aggressionLevel]) {
         multiplier = aggressionMap[aggressionLevel];
         label = aggressionLabels[aggressionLevel];
-        console.log(`[Fovea] Manual override: LUMAX_PROXY_AGGRESSION=${aggressionLevel} → multiplier=${multiplier} (${label})`);
+        console.log(`[Fovea] Manual override: XRLF_PROXY_AGGRESSION=${aggressionLevel} → multiplier=${multiplier} (${label})`);
     }
 
     // Deep copy base config
@@ -753,12 +753,12 @@ function scaleConfigForModel(modelName, baseConfig) {
     scaled.ring_token_budget = Math.max(128, Math.floor(baseConfig.ring_token_budget * multiplier));
 
     // ── Cloud Fovea Budget Overrides ───────────────────────────────────────
-    // Each fovea level can be overridden via .env (LUMAX_FOVEA1_CLOUD_BUDGET, etc.)
+    // Each fovea level can be overridden via .env (XRLF_FOVEA1_CLOUD_BUDGET, etc.)
     // Map multiplier → fovea level number for env var lookup
     const foveaLevelMap = { '0.32': 1, '1.0': 2, '2.0': 3, '4.0': 4, '10.0': 5, '25.0': 6 };
     const foveaLevel = foveaLevelMap[String(multiplier)];
     if (foveaLevel) {
-        const envVarName = `LUMAX_FOVEA${foveaLevel}_CLOUD_BUDGET`;
+        const envVarName = `XRLF_FOVEA${foveaLevel}_CLOUD_BUDGET`;
         const envBudgetOverride = parseInt(process.env[envVarName] || '0', 10);
         if (envBudgetOverride > 0) {
             scaled.ring_token_budget = envBudgetOverride;
@@ -827,7 +827,7 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
     // ── Code Preservation: Extract protected structures BEFORE stripping ──
     // This ensures code fences, thinking blocks, JSON schemas, and tool
     // definitions survive the aggressive stripping/compression pipeline.
-    const PRESERVE_CODE = REPO_ENABLED && REPO_CAPABILITY_OVERRIDE && process.env.LUMAX_PRESERVE_CODE !== '0' && process.env.LUMAX_PRESERVE_CODE !== 'false';
+    const PRESERVE_CODE = REPO_ENABLED && REPO_CAPABILITY_OVERRIDE && process.env.XRLF_PRESERVE_CODE !== '0' && process.env.XRLF_PRESERVE_CODE !== 'false';
     let preservationStore = null;
     let preservedMessages = rawMessages;
     if (PRESERVE_CODE) {
@@ -852,15 +852,15 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
     }
 
     let baseMessages = processedMessages;
-    const AUTO_CHECKPOINT = REPO_ENABLED && REPO_CONTEXT_OVERRIDE && process.env.LUMAX_PROXY_AUTO_CHECKPOINT !== '0' && process.env.LUMAX_PROXY_AUTO_CHECKPOINT !== 'false';
+    const AUTO_CHECKPOINT = REPO_ENABLED && REPO_CONTEXT_OVERRIDE && process.env.XRLF_PROXY_AUTO_CHECKPOINT !== '0' && process.env.XRLF_PROXY_AUTO_CHECKPOINT !== 'false';
     const reqCompressLevel = req.headers['x-compression-level'] ? parseInt(req.headers['x-compression-level'], 10) : 3;
 
     // ── Shadow Context: Save full-fidelity blocks to disc BEFORE compression ──
     // The model can zoom back into these via <zoom: "hash"> at any time.
     // The retina classifier ensures only HIGH-value context gets shadow storage.
     // MEDIUM goes to XRL checkpoint, LOW stays ephemeral, ZERO is discarded.
-    const SHADOW_ENABLED = REPO_ENABLED && REPO_FOVEATION_OVERRIDE && process.env.LUMAX_SHADOW_CONTEXT !== '0' && process.env.LUMAX_SHADOW_CONTEXT !== 'false';
-    const RETINA_ENABLED = REPO_ENABLED && REPO_FOVEATION_OVERRIDE && process.env.LUMAX_RETINA !== '0' && process.env.LUMAX_RETINA !== 'false';
+    const SHADOW_ENABLED = REPO_ENABLED && REPO_FOVEATION_OVERRIDE && process.env.XRLF_SHADOW_CONTEXT !== '0' && process.env.XRLF_SHADOW_CONTEXT !== 'false';
+    const RETINA_ENABLED = REPO_ENABLED && REPO_FOVEATION_OVERRIDE && process.env.XRLF_RETINA !== '0' && process.env.XRLF_RETINA !== 'false';
     let shadowRefs = [];
     let retinaStats = null;
     if (SHADOW_ENABLED) {
@@ -918,7 +918,7 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
     baseMessages = enforceCloudBudget(baseMessages, body.model || UPSTREAM_MODEL);
 
     // ── Smart Proxy Context Router ───────────────────────────────────────
-    const SMART_PROXY_ENABLED = REPO_ENABLED && REPO_CONTEXT_OVERRIDE && process.env.LUMAX_SMART_PROXY !== '0' && process.env.LUMAX_SMART_PROXY !== 'false';
+    const SMART_PROXY_ENABLED = REPO_ENABLED && REPO_CONTEXT_OVERRIDE && process.env.XRLF_SMART_PROXY !== '0' && process.env.XRLF_SMART_PROXY !== 'false';
     if (SMART_PROXY_ENABLED) {
         try {
             const { smartRouteMessages } = require('./core/smart-router');
@@ -940,7 +940,7 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
     // ── Self-Healing Context Guard ────────────────────────────────────────
     // Auto-scaling context budget that shrinks on upstream failure and
     // gradually recovers. Replaces the old static CTX_MAX_CHARS truncation.
-    const CTX_KEEP_LAST = parseInt(process.env.LUMAX_CTX_KEEP_LAST || '6', 10);
+    const CTX_KEEP_LAST = parseInt(process.env.XRLF_CTX_KEEP_LAST || '6', 10);
     const budgetResult = (REPO_ENABLED && REPO_CONTEXT_OVERRIDE) ? applyBudget(body.messages, CTX_KEEP_LAST) : { messages: body.messages, truncated: false, originalChars: 0, finalChars: 0, warning: '' };
     const { messages: budgetedMessages, truncated, originalChars, finalChars, warning } = budgetResult;
     body.messages = budgetedMessages;
@@ -966,8 +966,8 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
     // Only override when: (a) local LM Studio needs a specific model, or (b) model is 'auto'/empty.
     const shouldOverride = (isLocalLMStudio && COGNITIVE_MODE !== 'cloud') || originalModel === 'auto' || !originalModel;
     const currentEnvModel = COGNITIVE_MODE === 'cloud'
-        ? (process.env.LUMAX_MODEL_CLOUD_ID || process.env.LUMAX_PROXY_MODEL || UPSTREAM_MODEL).trim()
-        : (process.env.LUMAX_MODEL_LOCAL_ID || process.env.LUMAX_PROXY_MODEL || UPSTREAM_MODEL).trim();
+        ? (process.env.XRLF_MODEL_CLOUD_ID || process.env.XRLF_PROXY_MODEL || UPSTREAM_MODEL).trim()
+        : (process.env.XRLF_MODEL_LOCAL_ID || process.env.XRLF_PROXY_MODEL || UPSTREAM_MODEL).trim();
     if (shouldOverride) {
         body.model = currentEnvModel;
         console.log(`[Model] Resolved '${originalModel}' → '${body.model}' (Env target: ${currentEnvModel})`);
@@ -976,7 +976,7 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
     }
 
     // ── Self-Healing Upstream Fetch (with retry loop) ────────────────────
-    const MAX_CTX_RETRIES = parseInt(process.env.LUMAX_CTX_MAX_RETRIES || '3', 10);
+    const MAX_CTX_RETRIES = parseInt(process.env.XRLF_CTX_MAX_RETRIES || '3', 10);
     let upstreamRes;
     let retryCount = 0;
     let lastErrorText = '';
@@ -1047,7 +1047,7 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
                 choices: [{
                     message: {
                         role: 'assistant',
-                        content: `⚠️ Context overflow: The upstream model could not process this request even after auto-shrinking the context to ${getBudget()} chars. Please reduce the input size or increase LUMAX_CTX_MAX_CHARS. (Upstream: ${upstreamRes.status})`
+                        content: `⚠️ Context overflow: The upstream model could not process this request even after auto-shrinking the context to ${getBudget()} chars. Please reduce the input size or increase XRLF_CTX_MAX_CHARS. (Upstream: ${upstreamRes.status})`
                     },
                     index: 0,
                     finish_reason: 'error'
@@ -1306,7 +1306,7 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
         console.log(`\n👁️ [Saccade] Target: "${saccadeQuery}" | session=${activeSessionId} | fullText=${fullText.length} chars`);
 
         const parsed = parseSaccadeTarget(saccadeQuery);
-        const SACCADE_TOKEN_BUDGET = parseInt(process.env.LUMAX_SACCADE_TOKEN_BUDGET || '2000', 10);
+        const SACCADE_TOKEN_BUDGET = parseInt(process.env.XRLF_SACCADE_TOKEN_BUDGET || '2000', 10);
         const validation = validateSaccade(activeSessionId, parsed, baseMessages, SACCADE_TOKEN_BUDGET);
 
         if (!validation.valid) {
@@ -1355,7 +1355,7 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
         console.log(`\n🔬 [Accommodate] Directive: "${accommodateQuery}" | session=${activeSessionId} | fullText=${fullText.length} chars`);
 
         const parsed = parseAccommodate(accommodateQuery);
-        const ACCOMMODATE_TOKEN_BUDGET = parseInt(process.env.LUMAX_SACCADE_TOKEN_BUDGET || '2000', 10);
+        const ACCOMMODATE_TOKEN_BUDGET = parseInt(process.env.XRLF_SACCADE_TOKEN_BUDGET || '2000', 10);
         const result = executeAccommodate(activeSessionId, parsed, baseMessages, ACCOMMODATE_TOKEN_BUDGET);
 
         if (!result.valid || !result.injection) {
@@ -1422,7 +1422,7 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
                 fetch(`${mouthUrl}/say`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: cleanSpeech, voice: process.env.LUMAX_KOKORO_VOICE || 'af_heart' }),
+                    body: JSON.stringify({ text: cleanSpeech, voice: process.env.XRLF_KOKORO_VOICE || 'af_heart' }),
                     signal: AbortSignal.timeout(4000)
                 }).catch(() => {});
             }
@@ -1777,7 +1777,7 @@ app.post('/api/semantic-summary', async (req, res) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: process.env.LUMAX_MIDDLEMAN_MODEL || 'paper-summarizer',
+                model: process.env.XRLF_MIDDLEMAN_MODEL || 'paper-summarizer',
                 messages: [
                     { role: 'system', content: 'Summarize the following file in one concise sentence.' },
                     { role: 'user', content: text.slice(0, 4000) }
@@ -1839,7 +1839,7 @@ app.post('/v1beta/models/:apiAction', async (req, res) => {
             pseudoMessages = dedupeFileReads(pseudoMessages);
             
             // XRL Checkpointing
-            const AUTO_CHECKPOINT = process.env.LUMAX_PROXY_AUTO_CHECKPOINT !== '0' && process.env.LUMAX_PROXY_AUTO_CHECKPOINT !== 'false';
+            const AUTO_CHECKPOINT = process.env.XRLF_PROXY_AUTO_CHECKPOINT !== '0' && process.env.XRLF_PROXY_AUTO_CHECKPOINT !== 'false';
             if (AUTO_CHECKPOINT) {
                 try {
                     pseudoMessages = await compressContext(pseudoMessages, workspaceId);
@@ -2090,7 +2090,7 @@ app.get('/api/sessions', async (req, res) => {
             });
         } catch (_) {}
 
-        const priorityDirs = Array.from(new Set(['lumax', 'default', 'jen', workspaceId, ...subdirs]));
+        const priorityDirs = Array.from(new Set(['XRLF', 'default', 'jen', workspaceId, ...subdirs]));
         const sessionMap = new Map();
 
         for (const dbName of priorityDirs) {
@@ -2139,7 +2139,7 @@ app.post('/api/session/generate-title', async (req, res) => {
         let s = getStore(workspaceId);
         let msgs = await s.getBySession(sessionId);
         if (msgs.length === 0) {
-            for (const fallbackId of ['default', 'lumax']) {
+            for (const fallbackId of ['default', 'XRLF']) {
                 const fallbackStore = getStore(fallbackId);
                 const fallbackMsgs = await fallbackStore.getBySession(sessionId);
                 if (fallbackMsgs.length > 0) {
@@ -2162,7 +2162,7 @@ CRITICAL RULES:
 
 TITLE: <3-6 word descriptive summary title>
 THEME: <Code|Architecture|UI|General>
-PROJECT: <Project or workspace name, e.g. LUMAX, Jenna, Extension, or General>
+PROJECT: <Project or workspace name, e.g. XRLF, Jenna, Extension, or General>
 KEYWORDS_ROW1: <3-4 key topic tags, e.g. #WebXR #FoveatedMemory #VSCode>
 KEYWORDS_ROW2: <3-4 key issue/action tags, e.g. #FixSessionTitles #KeywordRows #UIEnhancement>
 
@@ -2192,7 +2192,7 @@ ${recentMsgs}`;
           title = 'Untitled Session';
         }
         let theme = (raw.match(/THEME:\s*([^\n]+)/i)?.[1] || 'General').trim();
-        let project = (raw.match(/PROJECT:\s*([^\n]+)/i)?.[1] || workspaceId || 'LUMAX').trim();
+        let project = (raw.match(/PROJECT:\s*([^\n]+)/i)?.[1] || workspaceId || 'XRLF').trim();
         
         let kw1 = (raw.match(/KEYWORDS_ROW1:\s*([^\n]+)/i)?.[1] || '').trim();
         let kw2 = (raw.match(/KEYWORDS_ROW2:\s*([^\n]+)/i)?.[1] || '').trim();
@@ -2238,7 +2238,7 @@ app.post('/api/session/purge-and-retitle', async (req, res) => {
             const prompt = `Analyze this chat snippet (last 10 turns of session) and return metadata in EXACT FORMAT:
 TITLE: <3-6 word clear, descriptive summary title of what was accomplished or discussed>
 THEME: <Code|Architecture|UI|General>
-PROJECT: <Project or workspace name, e.g. LUMAX, Jenna, Extension, or General>
+PROJECT: <Project or workspace name, e.g. XRLF, Jenna, Extension, or General>
 KEYWORDS_ROW1: <3-4 key topic tags, e.g. #WebXR #FoveatedMemory #VSCode>
 KEYWORDS_ROW2: <3-4 key issue/action tags, e.g. #FixSessionTitles #KeywordRows #UIEnhancement>
 
@@ -2264,7 +2264,7 @@ ${recentMsgs}`;
                     title = title.replace(/[◆◇■□●○★☆▲▼#*_`]/g, '').trim().replace(/^(the|a|an)\s+/i, '');
                     if (!title || title.length <= 3) title = 'Untitled Session';
                     let theme = (raw.match(/THEME:\s*([^\n]+)/i)?.[1] || 'General').trim();
-                    let project = (raw.match(/PROJECT:\s*([^\n]+)/i)?.[1] || workspaceId || 'LUMAX').trim();
+                    let project = (raw.match(/PROJECT:\s*([^\n]+)/i)?.[1] || workspaceId || 'XRLF').trim();
                     let kw1 = (raw.match(/KEYWORDS_ROW1:\s*([^\n]+)/i)?.[1] || '').trim();
                     let kw2 = (raw.match(/KEYWORDS_ROW2:\s*([^\n]+)/i)?.[1] || '').trim();
                     let keywords = [kw1, kw2].filter(Boolean).join('\n');
@@ -2291,7 +2291,7 @@ app.post('/api/session/ingredients', async (req, res) => {
         let s = getStore(workspaceId);
         let msgs = await s.getBySession(session_id);
         if (msgs.length === 0) {
-            for (const fallbackId of ['default', 'lumax']) {
+            for (const fallbackId of ['default', 'XRLF']) {
                 const fallbackStore = getStore(fallbackId);
                 const fallbackMsgs = await fallbackStore.getBySession(session_id);
                 if (fallbackMsgs.length > 0) {
@@ -2400,19 +2400,19 @@ function applyFrontendPreset(ui) {
     const targetPort = isXr ? '5176' : '8080';
     const targetProtocol = 'http';
 
-    setEnvVar('LUMAX_FRONTEND_UI', uiNorm);
+    setEnvVar('XRLF_FRONTEND_UI', uiNorm);
     setEnvVar('VITE_URL', `${targetProtocol}://127.0.0.1:${targetPort}`);
 
     // Update Cloudflare tunnel config if it exists
     const tunnelConfigPath = path.resolve(__dirname, '..', '..', 'config.yml');
     try {
         let raw = fs.readFileSync(tunnelConfigPath, 'utf8');
-        // Replace the whole ingress block for lumax.1um6a.se atomically
+        // Replace the whole ingress block for XRLF.1um6a.se atomically
         raw = raw.replace(
-            /hostname:\s*lumax\.1um6a\.se\r?\n\s*service:\s*http[s]*:\/\/[^\r\n]+(?:\r?\n\s*noTLSVerify:\s*true)?/,
+            /hostname:\s*XRLF\.1um6a\.se\r?\n\s*service:\s*http[s]*:\/\/[^\r\n]+(?:\r?\n\s*noTLSVerify:\s*true)?/,
             isXr
-                ? `hostname: lumax.1um6a.se\n    service: http://127.0.0.1:5176`
-                : `hostname: lumax.1um6a.se\n    service: http://127.0.0.1:8080`
+                ? `hostname: XRLF.1um6a.se\n    service: http://127.0.0.1:5176`
+                : `hostname: XRLF.1um6a.se\n    service: http://127.0.0.1:8080`
         );
         fs.writeFileSync(tunnelConfigPath, raw, 'utf8');
         console.log(`[Setting] Tunnel config updated → ${targetProtocol}://127.0.0.1:${targetPort}`);
@@ -2447,8 +2447,8 @@ app.post('/api/setting', (req, res) => {
     setEnvVar(key, String(val));
     process.env[key] = String(val);
 
-    // Auto-load new model in LM Studio if key is LUMAX_MODEL_LOCAL_ID
-    if (key === 'LUMAX_MODEL_LOCAL_ID') {
+    // Auto-load new model in LM Studio if key is XRLF_MODEL_LOCAL_ID
+    if (key === 'XRLF_MODEL_LOCAL_ID') {
         const modelId = String(val).trim();
         console.log(`[Setting] Switching active local model to ${modelId}...`);
         execFile('lms', ['load', modelId, '--identifier', modelId, '-y'], { timeout: 90000, windowsHide: true }, (err) => {
@@ -2458,7 +2458,7 @@ app.post('/api/setting', (req, res) => {
     }
 
     // Frontend preset: apply atomically (also updates tunnel + VITE_URL)
-    if (key === 'LUMAX_FRONTEND_UI_PRESET' && ['xr_vessel', '3d_avatar'].includes(String(val))) {
+    if (key === 'XRLF_FRONTEND_UI_PRESET' && ['xr_vessel', '3d_avatar'].includes(String(val))) {
         applyFrontendPreset(String(val));
     }
 
@@ -2490,7 +2490,7 @@ app.get('/api/env', (req, res) => {
 app.post('/api/toggle', (req, res) => {
     const { name, value } = req.body || {};
     if (!name) return res.status(400).json({ error: 'missing name' });
-    const envName = name === 'voice' ? 'LUMAX_VOICE_ENABLED' : name === 'mic' ? 'LUMAX_MIC_ENABLED' : name;
+    const envName = name === 'voice' ? 'XRLF_VOICE_ENABLED' : name === 'mic' ? 'XRLF_MIC_ENABLED' : name;
     setEnvVar(envName, value ? 'true' : 'false');
     res.json({ ok: true, [envName]: value ? 'true' : 'false' });
 });
@@ -2501,21 +2501,21 @@ app.post('/api/route', (req, res) => {
 
     // Atomic .env update for route switch (do not restart proxy from inside itself)
     if (mode === 'local') {
-        setEnvVar('LUMAX_COGNITIVE_MODE', 'local');
-        setEnvVar('LUMAX_CHAT_PROVIDER', 'lm_studio');
-        setEnvVar('LUMAX_LOCAL_BASE_URL', 'http://127.0.0.1:7272/v1');
+        setEnvVar('XRLF_COGNITIVE_MODE', 'local');
+        setEnvVar('XRLF_CHAT_PROVIDER', 'lm_studio');
+        setEnvVar('XRLF_LOCAL_BASE_URL', 'http://127.0.0.1:7272/v1');
         setEnvVar('LM_STUDIO_URL', 'http://127.0.0.1:7272');
         setEnvVar('LOCAL_LLM_BASE', 'http://127.0.0.1:7272');
-        process.env.LUMAX_COGNITIVE_MODE = 'local';
-        process.env.LUMAX_CHAT_PROVIDER = 'lm_studio';
-        process.env.LUMAX_LOCAL_BASE_URL = 'http://127.0.0.1:7272/v1';
+        process.env.XRLF_COGNITIVE_MODE = 'local';
+        process.env.XRLF_CHAT_PROVIDER = 'lm_studio';
+        process.env.XRLF_LOCAL_BASE_URL = 'http://127.0.0.1:7272/v1';
         process.env.LM_STUDIO_URL = 'http://127.0.0.1:7272';
         process.env.LOCAL_LLM_BASE = 'http://127.0.0.1:7272';
     } else {
-        setEnvVar('LUMAX_COGNITIVE_MODE', 'cloud');
-        setEnvVar('LUMAX_CHAT_PROVIDER', 'ollama_cloud');
-        process.env.LUMAX_COGNITIVE_MODE = 'cloud';
-        process.env.LUMAX_CHAT_PROVIDER = 'ollama_cloud';
+        setEnvVar('XRLF_COGNITIVE_MODE', 'cloud');
+        setEnvVar('XRLF_CHAT_PROVIDER', 'ollama_cloud');
+        process.env.XRLF_COGNITIVE_MODE = 'cloud';
+        process.env.XRLF_CHAT_PROVIDER = 'ollama_cloud';
     }
 
     res.json({ ok: true, mode });
@@ -2526,23 +2526,23 @@ app.post('/api/fovea', (req, res) => {
     if (typeof level === 'string') level = parseInt(level, 10);
     if (typeof level !== 'number' || isNaN(level) || level < 0 || level > 6) return res.status(400).json({ error: 'level must be 0-6' });
 
-    setEnvVar('LUMAX_PROXY_AGGRESSION', String(level));
-    process.env.LUMAX_PROXY_AGGRESSION = String(level);
+    setEnvVar('XRLF_PROXY_AGGRESSION', String(level));
+    process.env.XRLF_PROXY_AGGRESSION = String(level);
     res.json({ ok: true, level });
 });
 
 app.post('/api/cap', (req, res) => {
     const { cap } = req.body || {};
     if (typeof cap !== 'number' || cap < 0) return res.status(400).json({ error: 'cap must be >= 0' });
-    setEnvVar('LUMAX_CLOUD_MAX_TOKENS_CAP', String(cap));
+    setEnvVar('XRLF_CLOUD_MAX_TOKENS_CAP', String(cap));
     res.json({ ok: true, cap });
 });
 
 app.post('/api/preserve', (req, res) => {
     const { preserve } = req.body || {};
     if (typeof preserve !== 'number' || preserve < 0 || preserve > 100) return res.status(400).json({ error: 'preserve must be 0-100' });
-    setEnvVar('LUMAX_CLOUD_PRESERVE_LAST', String(preserve));
-    process.env.LUMAX_CLOUD_PRESERVE_LAST = String(preserve);
+    setEnvVar('XRLF_CLOUD_PRESERVE_LAST', String(preserve));
+    process.env.XRLF_CLOUD_PRESERVE_LAST = String(preserve);
     res.json({ ok: true, preserve });
 });
 
@@ -2566,16 +2566,16 @@ app.post('/api/control', (req, res) => {
             runPwsh(`Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*sleipnir_launcher.js*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`, (err) => err ? sendErr(err) : sendOk());
             break;
         case 'open-tray':
-            execFile('C:\\Windows\\System32\\cmd.exe', ['/c', 'start', '', path.join(repoRoot, 'LUMAX_Taskbar.pyw')], { windowsHide: true }, (err) => err ? sendErr(err) : sendOk());
+            execFile('C:\\Windows\\System32\\cmd.exe', ['/c', 'start', '', path.join(repoRoot, 'XRLF_Taskbar.pyw')], { windowsHide: true }, (err) => err ? sendErr(err) : sendOk());
             break;
         case 'open-terminal':
-            execFile(WT_EXE, ['new-tab', '--profile', 'LUMAX Super Memory', '-d', repoRoot], { windowsHide: true }, (err) => err ? sendErr(err) : sendOk());
+            execFile(WT_EXE, ['new-tab', '--profile', 'XRLF Super Memory', '-d', repoRoot], { windowsHide: true }, (err) => err ? sendErr(err) : sendOk());
             break;
         case 'open-debug-terminal':
-            execFile(WT_EXE, ['new-tab', '--profile', 'LUMAX Super Memory', '-d', repoRoot, '--title', 'LUMAX Debug'], { windowsHide: true }, (err) => err ? sendErr(err) : sendOk());
+            execFile(WT_EXE, ['new-tab', '--profile', 'XRLF Super Memory', '-d', repoRoot, '--title', 'XRLF Debug'], { windowsHide: true }, (err) => err ? sendErr(err) : sendOk());
             break;
         case 'show-meter':
-            runPwsh('Import-Module LumaxMemory; Show-MemoryMeter', (err) => err ? sendErr(err) : sendOk());
+            runPwsh('Import-Module XRLFMemory; Show-MemoryMeter', (err) => err ? sendErr(err) : sendOk());
             break;
         case 'unload-lm':
             fetch('http://127.0.0.1:1234/v1/models', { timeout: 5000 })
@@ -2591,10 +2591,10 @@ app.post('/api/control', (req, res) => {
             break;
         case 'open-quick-controls':
         case 'open-corner-companion':
-            execFile('C:\\Windows\\System32\\cmd.exe', ['/c', 'start', '', 'python', path.join(repoRoot, 'Tools', 'lumax_top_bar', 'lumax_top_bar.py'), '--quick-controls'], { windowsHide: true }, (err) => err ? sendErr(err) : sendOk());
+            execFile('C:\\Windows\\System32\\cmd.exe', ['/c', 'start', '', 'python', path.join(repoRoot, 'Tools', 'XRLF_top_bar', 'XRLF_top_bar.py'), '--quick-controls'], { windowsHide: true }, (err) => err ? sendErr(err) : sendOk());
             break;
         case 'open-topbar':
-            execFile('C:\\Windows\\System32\\cmd.exe', ['/c', 'start', '', 'python', path.join(repoRoot, 'Tools', 'lumax_top_bar', 'lumax_top_bar.py'), '--mode=topbar'], { windowsHide: true }, (err) => err ? sendErr(err) : sendOk());
+            execFile('C:\\Windows\\System32\\cmd.exe', ['/c', 'start', '', 'python', path.join(repoRoot, 'Tools', 'XRLF_top_bar', 'XRLF_top_bar.py'), '--mode=topbar'], { windowsHide: true }, (err) => err ? sendErr(err) : sendOk());
             break;
         case 'restart-proxy':
             sendOk();
@@ -2719,7 +2719,7 @@ async function runEcologicalContextWorker() {
             });
         } catch (_) {}
 
-        const workspaceIds = Array.from(new Set(['lumax', 'default', config.workspace_id, ...subdirs]));
+        const workspaceIds = Array.from(new Set(['XRLF', 'default', config.workspace_id, ...subdirs]));
 
         for (const wsId of workspaceIds) {
             const s = getStore(wsId);
@@ -2751,7 +2751,7 @@ async function runEcologicalContextWorker() {
                         const prompt = `Analyze this chat snippet (last 10 turns of session) and return metadata in EXACT FORMAT:
 TITLE: <3-6 word clear, descriptive summary title of what was accomplished or discussed>
 THEME: <Code|Architecture|UI|General>
-PROJECT: <Project or workspace name, e.g. LUMAX, Jenna, Extension, or General>
+PROJECT: <Project or workspace name, e.g. XRLF, Jenna, Extension, or General>
 KEYWORDS_ROW1: <3-4 key topic tags, e.g. #WebXR #FoveatedMemory #VSCode>
 KEYWORDS_ROW2: <3-4 key issue/action tags, e.g. #FixSessionTitles #KeywordRows #UIEnhancement>
 
@@ -2776,7 +2776,7 @@ ${recentMsgs}`;
                             title = title.replace(/[◆◇■□●○★☆▲▼#*_`]/g, '').trim().replace(/^(the|a|an)\s+/i, '');
                             if (!title || title.length <= 3) title = 'Untitled Session';
                             let theme = (raw.match(/THEME:\s*([^\n]+)/i)?.[1] || 'General').trim();
-                            let project = (raw.match(/PROJECT:\s*([^\n]+)/i)?.[1] || wsId || 'LUMAX').trim();
+                            let project = (raw.match(/PROJECT:\s*([^\n]+)/i)?.[1] || wsId || 'XRLF').trim();
                             let kw1 = (raw.match(/KEYWORDS_ROW1:\s*([^\n]+)/i)?.[1] || '').trim();
                             let kw2 = (raw.match(/KEYWORDS_ROW2:\s*([^\n]+)/i)?.[1] || '').trim();
                             let keywords = [kw1, kw2].filter(Boolean).join('\n');
@@ -2808,4 +2808,5 @@ ${recentMsgs}`;
 // Start ecological context sweeper (runs 5s after start, then every 3 minutes)
 setTimeout(runEcologicalContextWorker, 5000);
 setInterval(runEcologicalContextWorker, 180000);
+
 

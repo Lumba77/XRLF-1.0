@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ═══════════════════════════════════════════════════════
  * SHADOW CONTEXT — Zoom-Inable Disc Persistence
  * ═══════════════════════════════════════════════════════
@@ -37,15 +37,15 @@ const crypto = require('crypto');
 
 // ── Config ──────────────────────────────────────────────────────────────────
 
-const SHADOW_DIR = process.env.LUMAX_SHADOW_CONTEXT_DIR
-    ? path.resolve(process.env.LUMAX_SHADOW_CONTEXT_DIR)
+const SHADOW_DIR = process.env.XRLF_SHADOW_CONTEXT_DIR
+    ? path.resolve(process.env.XRLF_SHADOW_CONTEXT_DIR)
     : path.join(__dirname, '..', 'memory_data', 'shadow-context');
 
 // Maximum shadow blocks per session (oldest evicted beyond this)
-const MAX_SHADOW_BLOCKS = parseInt(process.env.LUMAX_SHADOW_MAX_BLOCKS || '500', 10);
+const MAX_SHADOW_BLOCKS = parseInt(process.env.XRLF_SHADOW_MAX_BLOCKS || '500', 10);
 
 // Maximum size per shadow block in chars (safety cap)
-const MAX_BLOCK_CHARS = parseInt(process.env.LUMAX_SHADOW_MAX_BLOCK_CHARS || '50000', 10);
+const MAX_BLOCK_CHARS = parseInt(process.env.XRLF_SHADOW_MAX_BLOCK_CHARS || '50000', 10);
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

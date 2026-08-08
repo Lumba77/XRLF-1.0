@@ -1,9 +1,9 @@
-/**
+﻿/**
  * ═══════════════════════════════════════════════════════
  * MEMBRANE BRIDGE — Node.js <-> Python Weaving Bridge
  * ═══════════════════════════════════════════════════════
  *
- * Spawns membrane_core.py to execute the LUMAX Membrane Balancer,
+ * Spawns membrane_core.py to execute the XRLF Membrane Balancer,
  * constructing a dynamic HUD containing turn counts, active checklist,
  * XRL codebase intuition, file edit diagnostics, and token budget pressure.
  */
@@ -146,3 +146,4 @@ ${redThread}
 }
 
 module.exports = { buildMembraneHUD, invokeMembraneCore };
+

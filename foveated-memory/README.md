@@ -1,4 +1,4 @@
-# Foveated Memory Proxy 🧠
+﻿# Foveated Memory Proxy 🧠
 
 This tool provides an **OpenAI-compatible proxy server** that gives any LLM infinite, on-demand foveated memory using XRL Active Recall. 
 
@@ -23,10 +23,10 @@ node server.js
 ### 3. Apply System-Wide (Or Repo-Wide)
 To give a system the upgraded foveated memory, simply change its OpenAI Base URL to point to the proxy instead of LM Studio.
 
-#### For the LUMAX Repo (Already Configured)
-The `.env` file in the root of the LUMAX repository has been updated to route all local traffic through this proxy automatically:
+#### For the XRLF Repo (Already Configured)
+The `.env` file in the root of the XRLF repository has been updated to route all local traffic through this proxy automatically:
 ```env
-LUMAX_LOCAL_BASE_URL=http://127.0.0.1:8200/v1
+XRLF_LOCAL_BASE_URL=http://127.0.0.1:8200/v1
 ```
 
 #### For System-Wide Applications (Cline, Cursor, AutoGen, etc.)
@@ -42,7 +42,7 @@ If you are pointing multiple applications (e.g. your Coding AI, and Jen) at this
 
 The proxy dynamically separates memory databases based on the **API Key** (Bearer Token) sent by the application.
 *   If your Coding AI sends a request with `API Key = coding_bot`, the proxy creates and uses a memory folder at `./memory_data/coding_bot`.
-*   If LUMAX sends a request with `API Key = jen`, the proxy creates and uses a memory folder at `./memory_data/jen`.
+*   If XRLF sends a request with `API Key = jen`, the proxy creates and uses a memory folder at `./memory_data/jen`.
 
 You don't need to configure anything. Just type a unique API Key into whatever app you are using, and the proxy will automatically spin up an isolated memory database for it on the fly!
 
@@ -54,3 +54,4 @@ Instead of blindly appending the last 10 messages (the "simple tag style"), this
 4. Detects `[recall: keywords]` tags in the model's output stream, pauses generation, searches the persistent TF-IDF database, and re-injects the retrieved memory back into the context.
 
 All memory is persistently saved locally in `./memory_data`.
+

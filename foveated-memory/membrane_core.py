@@ -1,7 +1,7 @@
-"""
-membrane_core — LUMAX MEMBRANE BALANCER ENGINE
+﻿"""
+membrane_core — XRLF MEMBRANE BALANCER ENGINE
 
-Deterministic context-weaving engine that implements the LUMAX MEMBRANE BALANCER
+Deterministic context-weaving engine that implements the XRLF MEMBRANE BALANCER
 SPECIFICATION v1.0. Loads weaving rules, evaluates red thread thickness, expands
 or contracts the skeleton, deploys or retracts tendrils, and compresses
 aggressively or gently based on token budget pressure.
@@ -191,7 +191,7 @@ def balance(
     tendrils: str,
     token_budget: int,
 ) -> Dict[str, Any]:
-    """Core balancer implementing the LUMAX MEMBRANE BALANCER algorithm.
+    """Core balancer implementing the XRLF MEMBRANE BALANCER algorithm.
 
     Parameters
     ----------
@@ -389,3 +389,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

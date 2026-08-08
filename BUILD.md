@@ -1,4 +1,4 @@
-# XRLF — Build Manual (v1.0)
+﻿# XRLF — Build Manual (v1.0)
 
 > **Versioned recipe** for reproducing `gemma-4-12b-xrl.xrlf` from scratch.
 > This manual freezes the exact build steps, prerequisites, and known failure modes
@@ -309,7 +309,7 @@ tts:
 ```
 
 Provider auto-detection order:
-1. **HTTP TTS service** — POST to endpoint (Lumax TTS at :8004)
+1. **HTTP TTS service** — POST to endpoint (XRLF TTS at :8004)
 2. **Kokoro** — local Python `kokoro` package (KPipeline)
 3. **Piper** — local `piper` executable
 4. **espeak-ng** — local `espeak-ng` executable
@@ -355,7 +355,7 @@ All hooks emit events with this schema:
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| TTS returns None | All providers unavailable | Falls back to stub (expected); install Piper or run Lumax TTS |
+| TTS returns None | All providers unavailable | Falls back to stub (expected); install Piper or run XRLF TTS |
 | Image gen returns None | No SD endpoint | Expected in stub mode; start A1111/ComfyUI on :7860 |
 | Hook not firing | Registry not loaded | Check `XRL_MM_HOOKS` section exists in `.xrlf` |
 | Schema validation fails | Malformed hook config | Re-pack with `packer.add_multimodal_hooks()` |

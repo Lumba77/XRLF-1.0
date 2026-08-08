@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 # super-memory-prompt-gui.html
 # Companion kiosk-style prompt composer for the super-memory dashboard.
 # Serves from Tools/foveated-memory/public/prompt-kiosk.html
@@ -8,7 +8,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LUMAX Super Prompt Kiosk</title>
+  <title>XRLF Super Prompt Kiosk</title>
   <style>
     :root {
       --bg: #0b0d14; --panel: #12141f; --panel-2: #1a1d2e; --accent: #00f0ff;
@@ -108,7 +108,7 @@
           Target: 
           <select id="targetSelect" class="target-select">
             <option value="auto">Auto-Detect Active IDE (Recommended)</option>
-            <option value="lumax">LUMAX Agent (Direct Exec in Kiosk)</option>
+            <option value="XRLF">FoveAI Agent (Direct Exec in Kiosk)</option>
             <option value="antigravity">Antigravity / AGY</option>
             <option value="vscode">VS Code</option>
             <option value="cursor">Cursor</option>
@@ -146,7 +146,7 @@
     let detectedPrimary = { id: 'antigravity', name: 'Antigravity / AGY', scheme: 'lx://chat?q=' };
     
     const SCHEMA_MAP = {
-      lumax: 'direct',
+      XRLF: 'direct',
       antigravity: 'lx://chat?q=',
       vscode: 'vscode://chat?q=',
       cursor: 'cursor://chat?q=',
@@ -157,7 +157,7 @@
     };
 
     const NAME_MAP = {
-      lumax: 'LUMAX Agent (Direct Exec)',
+      XRLF: 'FoveAI Agent (Direct Exec)',
       antigravity: 'Antigravity / AGY',
       vscode: 'VS Code',
       cursor: 'Cursor',
@@ -183,9 +183,9 @@
     }
 
     targetSelect.addEventListener('change', () => {
-      if (targetSelect.value === 'lumax') {
-        activeTargetLabel.textContent = `Target: LUMAX Agent (Direct Exec)`;
-        sendBtn.textContent = '🚀 Execute in LUMAX Agent';
+      if (targetSelect.value === 'XRLF') {
+        activeTargetLabel.textContent = `Target: FoveAI Agent (Direct Exec)`;
+        sendBtn.textContent = '🚀 Execute in FoveAI Agent';
       } else if (targetSelect.value === 'auto') {
         activeTargetLabel.textContent = `Active Target: ${detectedPrimary.name}`;
         sendBtn.textContent = '🚀 Send to Active IDE';
@@ -213,7 +213,7 @@
       const bonus = Math.min(2000, Math.round(tokens * .25));
       document.getElementById('memBonus').textContent = '+' + bonus.toLocaleString();
       if (previewHeader.textContent === 'Context & System Preview') {
-        previewEl.textContent = `System: You are the LUMAX Diamond Concordia agent with foveated memory active.\n` +
+        previewEl.textContent = `System: You are the XRLF Diamond Concordia agent with foveated memory active.\n` +
           `Recall: [CKP:auto] prior related context will be injected.\n` +
           `User: ${text || '(empty)'}`;
       }
@@ -260,16 +260,16 @@
 
       let targetId = targetSelect.value;
 
-      // MODE A: Direct Execution in LUMAX Agent Core
-      if (targetId === 'lumax') {
+      // MODE A: Direct Execution in FoveAI Agent Core
+      if (targetId === 'XRLF') {
         sendBtn.disabled = true;
         const originalText = sendBtn.textContent;
-        sendBtn.textContent = '⏳ Processing in LUMAX Agent...';
-        previewHeader.textContent = 'LUMAX Agent Response';
-        previewEl.textContent = 'Communicating with LUMAX Foveated Memory Proxy & Sovereign Core...';
+        sendBtn.textContent = '⏳ Processing in FoveAI Agent...';
+        previewHeader.textContent = 'FoveAI Agent Response';
+        previewEl.textContent = 'Communicating with XRLF Foveated Memory Proxy & Sovereign Core...';
 
         try {
-          const res = await fetch('/api/lumax/dispatch', {
+          const res = await fetch('/api/XRLF/dispatch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: promptText })
@@ -277,10 +277,10 @@
           const data = await res.json();
           if (res.ok && data.ok) {
             previewEl.textContent = data.response;
-            showToast('✦ Response received from LUMAX Agent!');
+            showToast('✦ Response received from FoveAI Agent!');
           } else {
             previewEl.textContent = `[Error] ${data.error || 'Failed to get response'}`;
-            showToast('⚠️ LUMAX dispatch failed. Check debug log.');
+            showToast('⚠️ XRLF dispatch failed. Check debug log.');
           }
         } catch (err) {
           previewEl.textContent = `[Error] Connection error: ${err.message}`;
@@ -325,3 +325,4 @@
   </script>
 </body>
 </html>
+

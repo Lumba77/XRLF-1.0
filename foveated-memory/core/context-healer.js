@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ═══════════════════════════════════════════════════════
  * CONTEXT HEALER — Self-Healing Context Budget Manager
  * ═══════════════════════════════════════════════════════
@@ -25,12 +25,12 @@ const fs = require('fs');
 const path = require('path');
 
 // ── Config ──────────────────────────────────────────────────────────────────
-const MAX_BUDGET_CHARS  = parseInt(process.env.LUMAX_CTX_MAX_CHARS   || '50000', 10);
-const MIN_BUDGET_CHARS  = parseInt(process.env.LUMAX_CTX_MIN_CHARS   || '4000',  10);
-const BACKOFF_FACTOR    = parseFloat(process.env.LUMAX_CTX_BACKOFF   || '0.5');    // halve on failure
-const RECOVERY_STEP     = parseInt(process.env.LUMAX_CTX_RECOVERY     || '2000', 10); // +2K chars on success
-const MAX_RETRIES       = parseInt(process.env.LUMAX_CTX_MAX_RETRIES || '3',     10);
-const COOLDOWN_MS       = parseInt(process.env.LUMAX_CTX_COOLDOWN     || '30000', 10); // 30s before recovery
+const MAX_BUDGET_CHARS  = parseInt(process.env.XRLF_CTX_MAX_CHARS   || '50000', 10);
+const MIN_BUDGET_CHARS  = parseInt(process.env.XRLF_CTX_MIN_CHARS   || '4000',  10);
+const BACKOFF_FACTOR    = parseFloat(process.env.XRLF_CTX_BACKOFF   || '0.5');    // halve on failure
+const RECOVERY_STEP     = parseInt(process.env.XRLF_CTX_RECOVERY     || '2000', 10); // +2K chars on success
+const MAX_RETRIES       = parseInt(process.env.XRLF_CTX_MAX_RETRIES || '3',     10);
+const COOLDOWN_MS       = parseInt(process.env.XRLF_CTX_COOLDOWN     || '30000', 10); // 30s before recovery
 
 // ── State ───────────────────────────────────────────────────────────────────
 let currentBudget  = MAX_BUDGET_CHARS;
@@ -228,7 +228,7 @@ function applyBudget(messages, keepLast = 4) {
 function injectWarning(content, warning) {
     if (!warning) return content;
     // Add as an HTML-comment-style marker that's parseable but unobtrusive
-    return content + `\n\n<!-- LUMAX_CTX_WARNING: ${warning} -->`;
+    return content + `\n\n<!-- XRLF_CTX_WARNING: ${warning} -->`;
 }
 
 /**
@@ -268,3 +268,4 @@ module.exports = {
     MAX_BUDGET_CHARS,
     MIN_BUDGET_CHARS,
 };
+

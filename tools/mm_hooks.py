@@ -1,4 +1,4 @@
-"""
+﻿"""
 tools/mm_hooks.py — Multimodal Tool Hooks
 ==========================================
 Gemma-4-12B handles natively: image in, video in, audio/speech in, text in/out.
@@ -84,7 +84,7 @@ class TTSHook(BaseHook):
 
     Supported provider types:
       - auto: choose the most usable provider in this order:
-          * Lumax HTTP TTS service at http://127.0.0.1:8004/tts
+          * XRLF HTTP TTS service at http://127.0.0.1:8004/tts
           * KPipeline-backed Kokoro if the compatible package is installed
           * Piper
           * espeak-ng
@@ -465,3 +465,4 @@ def _save_wav(audio_data, sample_rate: int, path: str):
         wf.setsampwidth(2)
         wf.setframerate(sample_rate)
         wf.writeframes(samples.tobytes())
+
