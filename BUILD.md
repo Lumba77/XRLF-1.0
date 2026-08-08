@@ -1,4 +1,4 @@
-﻿# XRLF — Build Manual (v1.0)
+# XRLF — Build Manual (v1.0)
 
 > **Versioned recipe** for reproducing `gemma-4-12b-xrl.xrlf` from scratch.
 > This manual freezes the exact build steps, prerequisites, and known failure modes
@@ -97,10 +97,11 @@ The XRL cognitive layer is distilled from a source model into JSON artifacts sto
 ```powershell
 # Using the local GGUF probe (Qwen3.5-4B)
 python xrl_process_qwen4b_gguf.py
-
-# Or using the modular builder
-python builder/distillation/distill_xrl.py
 ```
+
+> **Note:** The modular distillation pipeline (`builder/distillation/distill_xrl.py`) is
+> planned for XRLF v1.1. For now, use `xrl_process_qwen4b_gguf.py` to regenerate
+> the `xrl_encoded/` artifacts.
 
 The distillation process:
 1. Loads the source model (Qwen3.5-4B GGUF or API endpoint)
@@ -265,20 +266,19 @@ python memory/init_memory.py
 
 ### 6.4 Cloud Memory (Distributed Persistence)
 
-For cross-machine continuity, the memory engine supports a cloud sync layer:
+> **Note:** Cloud memory sync (`memory/cloud_sync.py` and `memory/wake_up_test.py`) is
+> planned for XRLF v1.1. The foveated ring memory currently persists locally via SQLite
+> inside the `.xrlf` file. Cross-machine sync will be added in the next milestone.
+
+The planned architecture will support:
 
 ```powershell
-# Set cloud store URL
+# PostgreSQL
 set XRLF_CLOUD_MEMORY_URL=postgresql://user:pass@host:5432/xrlf
 
-# Or use SQLite cloud (Turso, libSQL)
+# SQLite cloud (Turso / libSQL)
 set XRLF_CLOUD_MEMORY_URL=libsql://xrlf.turso.io
-
-# Run wake-up test (verifies cross-instance recall)
-python memory/wake_up_test.py
 ```
-
-See `memory/cloud_sync.py` for the sync adapter implementation.
 
 ---
 
@@ -390,6 +390,7 @@ xrlf-model/
   memory/             ← In-process foveated memory engine
   tools/              ← Multimodal hooks (TTS auto-detect)
   api/                ← OpenAI-compatible REST API
+  _forge/             ← Build utilities (manifest generator)
   xrl_encoded/        ← XRL JSON artifacts (distilled from Qwen3.5-4B)
   foveated-memory/    ← Original Foveated Memory system (Node.js)
   xrlf_config.yaml   ← Master config
@@ -401,10 +402,20 @@ xrlf-model/
 ### 9.2 Generating a SHA-256 Manifest
 
 ```powershell
+# Print manifest table
 python _forge/build_manifest.py
+
+# Target a specific .xrlf file
+python _forge/build_manifest.py --xrlf gemma-4-12b-xrl.xrlf
+
+# Also compute full-file SHA-256 (slow — reads the entire ~5 GB file)
+python _forge/build_manifest.py --full-sha
+
+# Save manifest as JSON
+python _forge/build_manifest.py --json
 ```
 
-This reads the `.xrlf` header and section table, computes per-section SHA-256 hashes (fast, kilobytes), and outputs a manifest table. Full-file SHA-256 is reserved for release builds.
+This reads the `.xrlf` header and section table, computes per-section SHA-256 hashes (fast — reads only kilobytes of metadata), and outputs a manifest table. Full-file SHA-256 via `--full-sha` is optional and reserved for release verification.
 
 ---
 

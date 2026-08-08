@@ -1,4 +1,4 @@
-﻿"""
+"""
 tools/mm_hooks.py — Multimodal Tool Hooks
 ==========================================
 Gemma-4-12B handles natively: image in, video in, audio/speech in, text in/out.

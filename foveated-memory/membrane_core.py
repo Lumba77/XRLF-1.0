@@ -1,4 +1,4 @@
-﻿"""
+"""
 membrane_core — XRLF MEMBRANE BALANCER ENGINE
 
 Deterministic context-weaving engine that implements the XRLF MEMBRANE BALANCER

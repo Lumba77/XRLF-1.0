@@ -71,6 +71,7 @@ Thumbs.db
 $null
 implementation_plan.md
 repo-skeleton.md
+xrl-info/
 
 # Build artifacts
 *.whl
