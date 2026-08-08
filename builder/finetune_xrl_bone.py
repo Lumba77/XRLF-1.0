@@ -1,5 +1,10 @@
 import torch
+import os
 from unsloth import FastVisionModel
+
+# Canonical output directory — all generated XRLF models go here
+XRLF_OUTPUT_DIR = os.path.expanduser(r"~\.cache\huggingface\hub\lumax-forge\XRLF")
+os.makedirs(XRLF_OUTPUT_DIR, exist_ok=True)
 
 # ==============================================================================
 # XRLF BONE MODEL FINETUNING SCRIPT (Qwen2.5-VL-3B to MoQ GGUF)
@@ -74,7 +79,7 @@ def main():
             weight_decay = 0.01,
             lr_scheduler_type = "linear",
             seed = 3407,
-            output_dir = "outputs",
+            output_dir = os.path.join(XRLF_OUTPUT_DIR, "training-checkpoints"),
             report_to = "none",
         ),
     )
@@ -86,13 +91,14 @@ def main():
     print("5. Exporting to MoQ GGUF (q4_k_m)...")
     # This single line merges the LoRA into the base weights, quantizes the language model 
     # to q4_k_m, and also quantizes the mmproj (Vision Projector) appropriately!
+    gguf_out = os.path.join(XRLF_OUTPUT_DIR, "qwen2.5-vl-3b-xrl-bone")
     model.save_pretrained_gguf(
-        "qwen2.5-vl-3b-xrl-bone", 
-        tokenizer, 
+        gguf_out,
+        tokenizer,
         quantization_method = "q4_k_m"
     )
 
-    print("Done! Check the 'qwen2.5-vl-3b-xrl-bone' directory for your .gguf and mmproj files.")
+    print(f"Done! Check '{gguf_out}' for your .gguf and mmproj files.")
 
 if __name__ == "__main__":
     main()

@@ -14,10 +14,15 @@ from transformers import TrainingArguments
 # Configuration
 # Note: Unsloth pulls optimized 4-bit weights from HF. If you have the raw safetensors for the 4B model locally,
 # update the model_name to point to your local directory.
+import os
 MODEL_NAME = "unsloth/Qwen2.5-3B-Instruct-bnb-4bit" # Proxy for the 4B core
 DATASET_PATH = "conciseness_dataset.jsonl"
 MAX_SEQ_LENGTH = 2048
 LORA_RANK = 16
+
+# Canonical output directory — all generated XRLF models go here
+XRLF_OUTPUT_DIR = os.path.expanduser(r"~\.cache\huggingface\hub\lumax-forge\XRLF")
+os.makedirs(XRLF_OUTPUT_DIR, exist_ok=True)
 
 def main():
     print(f"Loading {MODEL_NAME} via Unsloth...")
@@ -74,7 +79,7 @@ def main():
             weight_decay = 0.01,
             lr_scheduler_type = "linear",
             seed = 3407,
-            output_dir = "outputs",
+            output_dir = os.path.join(XRLF_OUTPUT_DIR, "training-checkpoints"),
             save_strategy = "no",
         ),
     )
@@ -84,8 +89,9 @@ def main():
 
     print("Training complete! Exporting to GGUF format...")
     # Export the LoRA merged with the base model directly to GGUF so it can be injected back into XRLF
-    model.save_pretrained_gguf("qwen-4b-concise", tokenizer, quantization_method = "q4_k_m")
-    print("Exported to qwen-4b-concise-unsloth.Q4_K_M.gguf")
+    gguf_out = os.path.join(XRLF_OUTPUT_DIR, "qwen-4b-concise")
+    model.save_pretrained_gguf(gguf_out, tokenizer, quantization_method = "q4_k_m")
+    print(f"Exported to {gguf_out} (.Q4_K_M.gguf)")
 
 if __name__ == "__main__":
     main()
