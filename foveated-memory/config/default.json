@@ -1,0 +1,113 @@
+{
+  "proxy_port": 8202,
+  "upstream_url": "http://127.0.0.1:7272",
+  "workspace_id": "default",
+  "workspace_mode": "personal",
+  "identity_name": "Jenna (Jennifer Forbee)",
+  "user_name": "Daniel",
+  "persist_path": "./memory_data",
+  "ring_token_budget": 400,
+  "fovea_message_count": 4,
+  "anonymize_on_write": false,
+  "recall_max_results": 5,
+  "recall_token_budget_per_injection": 80,
+  "xrl_compression_levels": [0, 1, 2, 3, 4, 5],
+  "ring_budgets": {
+    "0": 180,
+    "1": 80,
+    "2": 60,
+    "3": 40,
+    "4": 25,
+    "5": 15
+  },
+  "foveation_profiles": {
+    "4k_shadow": {
+      "total_token_budget": 4000,
+      "ring_token_budget": 400,
+      "fovea_message_count": 3,
+      "recall_max_results": 3,
+      "ring_budgets": {
+        "0": 1200,
+        "1": 800,
+        "2": 600,
+        "3": 300,
+        "4": 100,
+        "5": 50
+      },
+      "compression": {
+        "fovea_level": 1,
+        "fovea_compression_pct": 50,
+        "fovea_preserve_crucial": true,
+        "parafovea_level": 2,
+        "parafovea_compression_pct": 75,
+        "near_periphery_level": 3,
+        "near_periphery_compression_pct": 88,
+        "mid_periphery_level": 4,
+        "mid_periphery_compression_pct": 95,
+        "far_periphery_level": 5,
+        "far_periphery_compression_pct": 98,
+        "outer_periphery_level": 5,
+        "outer_periphery_compression_pct": 99
+      },
+      "crucial_context": {
+        "enabled": true,
+        "preserve_patterns": [
+          "task_board",
+          "todo_list",
+          "active_tasks",
+          "pending_tasks",
+          "cleared_tasks",
+          "agent_hud",
+          "red_thread",
+          "goal_intent",
+          "session_intent",
+          "file_edit_status",
+          "error_diagnosis",
+          "decision_log",
+          "current_mode",
+          "system_directives"
+        ]
+      },
+      "shadow_context": {
+        "enabled": true,
+        "save_before_compress": true,
+        "zoom_enabled": true
+      }
+    },
+    "standard": {
+      "ring_token_budget": 400,
+      "fovea_message_count": 4,
+      "ring_budgets": {
+        "0": 180,
+        "1": 80,
+        "2": 60,
+        "3": 40,
+        "4": 25,
+        "5": 15
+      }
+    }
+  },
+  "continuation_prompt": "[SYSTEM: Memory uncompressed. Please continue answering the user.]",
+  "log_level": "info",
+  "code_preservation": {
+    "enabled": true,
+    "rules": [
+      { "name": "code_fence",         "enabled": true,  "minLength": 20 },
+      { "name": "thinking_block",     "enabled": true,  "minLength": 10 },
+      { "name": "json_object",        "enabled": true,  "minLength": 50 },
+      { "name": "tool_call_xml",      "enabled": true,  "minLength": 20 },
+      { "name": "xml_block",          "enabled": true,  "minLength": 30 },
+      { "name": "inline_code",        "enabled": true,  "minLength": 20 },
+      { "name": "function_signature", "enabled": false, "minLength": 30 },
+      { "name": "task_board",         "enabled": true,  "minLength": 15, "crucial": true },
+      { "name": "todo_list",          "enabled": true,  "minLength": 15, "crucial": true },
+      { "name": "agent_hud",          "enabled": true,  "minLength": 20, "crucial": true },
+      { "name": "red_thread",         "enabled": true,  "minLength": 10, "crucial": true },
+      { "name": "decision_log",       "enabled": true,  "minLength": 15, "crucial": true },
+      { "name": "file_edit_status",   "enabled": true,  "minLength": 15, "crucial": true },
+      { "name": "error_diagnosis",    "enabled": true,  "minLength": 20, "crucial": true },
+      { "name": "current_mode",       "enabled": true,  "minLength": 20, "crucial": true },
+      { "name": "system_directives",  "enabled": true,  "minLength": 30, "crucial": true }
+    ]
+  }
+}

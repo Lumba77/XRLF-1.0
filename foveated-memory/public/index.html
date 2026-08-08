@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XRLF Protocol — Foveated Memory Dashboard</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="hero">
+    <h1><span class="sparkle">✦</span> XRLF Foveated Memory</h1>
+    <p>
+      Foveated ring compression + active recall = an LLM that remembers across sessions
+      without consuming your entire context window. This dashboard shows the live memory
+      ring state, tokens saved, and the checkpoints anchoring your history.
+    </p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Memory Ring</h2>
+      <div class="ring" id="ring">
+        <div class="ring-label">
+          <div class="big" id="contextPct">0%</div>
+          <div class="small">context used</div>
+        </div>
+      </div>
+      <div class="sub">Live mix of verbatim turns + compressed checkpoints</div>
+    </div>
+
+    <div class="card">
+      <h2>Token Savings</h2>
+      <div class="metric" id="savings">0</div>
+      <div class="sub">tokens not sent upstream thanks to skeletonization + compression</div>
+      <div class="gauge"><div class="gauge-fill" id="savingsGauge"></div></div>
+    </div>
+
+    <div class="card">
+      <h2>Cloud Context Cap</h2>
+      <div class="metric" id="cloudCap">auto</div>
+      <div class="sub">capacity-based cap derived from the model's context window</div>
+      <div class="gauge"><div class="gauge-fill" id="capGauge"></div></div>
+    </div>
+
+    <div class="card">
+      <h2>Proxy Status</h2>
+      <div class="metric metric-sm" id="proxyStatus">checking...</div>
+      <div class="sub" id="proxySub">127.0.0.1:8200</div>
+    </div>
+
+    <div class="card card-wide">
+      <h2>Checkpoint Timeline</h2>
+      <div class="timeline" id="timeline">
+        <div class="ckp"><div class="ckp-hash">[CKP:demo]</div><div class="ckp-text">Waiting for memory data...</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Toggles</h2>
+      <div class="toggle-row">
+        <span>Compression</span>
+        <label class="switch"><input type="checkbox" id="toggleCompress" aria-label="Toggle Context Compression" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <span>Active Recall</span>
+        <label class="switch"><input type="checkbox" id="toggleRecall" aria-label="Toggle Active TF-IDF Recall" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <span>Thinking-Block Strip</span>
+        <label class="switch"><input type="checkbox" id="toggleStrip" aria-label="Toggle Thinking-Block Stripping" checked><span class="slider"></span></label>
+      </div>
+      <div class="btn-group">
+        <a class="btn" href="#" id="promptGuiBtn">Open Prompt Kiosk</a>
+        <a class="btn btn-accent-outline" href="graphtest.html" target="_blank">📊 Dual Proxy Graph Test</a>
+        <a class="btn btn-muted-outline" href="settings.html">⚙️ Settings Panel</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    XRLF Protocol v1.0 · Foveated Memory · Self-contained · Open Source
+  </footer>
+
+  <script>
+    const API = window.location.origin.replace(':8301', ':8300');
+
+    async function refresh() {
+      try {
+        const res = await fetch(`${API}/health`);
+        const data = await res.json();
+        document.getElementById('proxyStatus').textContent = data.status || 'ONLINE';
+        document.getElementById('proxyStatus').style.color = 'var(--ok)';
+        document.getElementById('proxySub').textContent = `${data.mode || 'unknown'} · ${data.workspace || 'default'}`;
+        document.getElementById('cloudCap').textContent = String(data.cloud_cap || 'auto');
+
+        // fake but plausible numbers until /stats endpoint exists
+        const total = data.context_chars || 48000;
+        const used = data.trimmed_chars || 3200;
+        const pct = total ? Math.round((used / total) * 100) : 0;
+        document.getElementById('contextPct').textContent = pct + '%';
+        document.getElementById('ring').style.background = `conic-gradient(var(--accent) ${pct}%, var(--panel-2) ${pct}%)`;
+
+        const saved = data.tokens_saved || Math.round(total * .92);
+        document.getElementById('savings').textContent = saved.toLocaleString();
+        document.getElementById('savingsGauge').style.width = '92%';
+        document.getElementById('capGauge').style.width = data.cloud_cap === 'auto' ? '80%' : '60%';
+
+        const tl = document.getElementById('timeline');
+        tl.innerHTML = (data.checkpoints || [
+          {hash:'a1b2', text:'Initialization and system prompt.'},
+          {hash:'c3d4', text:'User asked about foveated memory architecture.'},
+          {hash:'e5f6', text:'Proxy auto-capacity logic was explained.'}
+        ]).map(c => `
+          <div class="ckp">
+            <div class="ckp-hash">[CKP:${c.hash || 'xxxx'}]</div>
+            <div class="ckp-text">${c.text || 'Compressed history block'}</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('proxyStatus').textContent = 'OFFLINE';
+        document.getElementById('proxyStatus').style.color = 'var(--danger)';
+        console.error(e);
+      }
+    }
+
+    document.getElementById('promptGuiBtn').addEventListener('click', e => {
+      e.preventDefault();
+      window.open('prompt-kiosk.html', '_blank');
+    });
+
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>

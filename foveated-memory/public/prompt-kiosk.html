@@ -1,0 +1,327 @@
+<!--
+# super-memory-prompt-gui.html
+# Companion kiosk-style prompt composer for the super-memory dashboard.
+# Serves from Tools/foveated-memory/public/prompt-kiosk.html
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUMAX Super Prompt Kiosk</title>
+  <style>
+    :root {
+      --bg: #0b0d14; --panel: #12141f; --panel-2: #1a1d2e; --accent: #00f0ff;
+      --accent-2: #ff00aa; --text: #e4e6f0; --muted: #8b90a8; --ok: #00e676;
+      --font: 'Segoe UI', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    h1 { font-size: 2rem; margin-bottom: .4rem; display: flex; align-items: center; gap: .6rem; }
+    .sub { color: var(--muted); margin-bottom: 1.5rem; }
+    .editor { background: var(--panel); border: 1px solid #1f2233; border-radius: 12px; padding: 1rem; }
+    textarea {
+      width: 100%; min-height: 160px; background: var(--panel-2); color: var(--text);
+      border: 1px solid #2a2d45; border-radius: 8px; padding: .8rem; font-size: 1rem;
+      resize: vertical; font-family: inherit;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+    .chip {
+      background: var(--panel-2); border: 1px solid #2a2d45; border-radius: 20px;
+      padding: .4rem .9rem; cursor: pointer; font-size: .9rem; transition: .15s;
+    }
+    .chip:hover, .chip.active { border-color: var(--accent); color: var(--accent); }
+    .meters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+    .meter { background: var(--panel); border-radius: 10px; padding: 1rem; text-align: center; }
+    .meter-val { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+    .meter-lbl { color: var(--muted); font-size: .8rem; margin-top: .3rem; }
+    
+    .actions { display: flex; flex-direction: column; gap: .8rem; }
+    .target-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--panel); border: 1px solid #1f2233; border-radius: 8px; padding: .6rem 1rem;
+      font-size: .88rem; color: var(--muted);
+    }
+    .target-badge { display: flex; align-items: center; gap: .5rem; color: var(--ok); font-weight: 600; }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+    .target-select {
+      background: var(--panel-2); color: var(--text); border: 1px solid #2a2d45;
+      border-radius: 6px; padding: .3rem .6rem; font-size: .85rem; cursor: pointer; outline: none;
+    }
+
+    .btn-row { display: flex; gap: 1rem; }
+    .btn {
+      flex: 1; background: linear-gradient(135deg, #00f0ff, #7000ff); color: #fff; border: none; border-radius: 8px;
+      padding: 1rem; font-weight: 700; font-size: 1.1rem; cursor: pointer; text-align: center; text-decoration: none;
+      box-shadow: 0 0 20px rgba(0,240,255,0.25); transition: all 0.2s ease-in-out;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0,240,255,0.45); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn.secondary { flex: 0 0 auto; background: var(--panel-2); color: var(--text); border: 1px solid #2a2d45; padding: 1rem 1.5rem; font-size: .95rem; }
+    
+    .preview-box { margin-top: 1.5rem; }
+    .preview-header { font-size: .9rem; color: var(--muted); margin-bottom: .5rem; font-weight: 600; }
+    .preview {
+      background: var(--panel); border-radius: 12px; padding: 1rem;
+      border: 1px solid #1f2233; white-space: pre-wrap; font-family: monospace; color: var(--muted);
+      max-height: 400px; overflow-y: auto;
+    }
+
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; background: linear-gradient(135deg, #00f0ff, #00e676); color: #000;
+      padding: .8rem 1.4rem; border-radius: 8px; font-weight: 700; font-size: .95rem;
+      box-shadow: 0 4px 25px rgba(0,240,255,0.5); display: none; opacity: 0; transition: opacity .3s ease; z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>✦ Super Prompt Kiosk</h1>
+    <div class="sub">Compose memory-augmented prompts with skeletonization and active recall context.</div>
+
+    <div class="editor">
+      <textarea id="prompt" placeholder="Describe what you want to build, debug, or optimize..."></textarea>
+      <div class="chips" id="chips">
+        <div class="chip" data-tpl="Analyze {{file}} for hot paths and propose a minimal refactor.">Analyze file</div>
+        <div class="chip" data-tpl="Recall prior decisions about {{topic}} and suggest the next step.">Recall topic</div>
+        <div class="chip" data-tpl="Skeletonize {{file}} at level 4, then explain the public API.">Skeletonize API</div>
+        <div class="chip" data-tpl="Debug why {{symptom}} happens; check proxy health and .env overrides.">Debug symptom</div>
+        <div class="chip" data-tpl="Optimize token usage in {{file}} using tier-info.">Optimize tokens</div>
+      </div>
+    </div>
+
+    <div class="meters">
+      <div class="meter"><div class="meter-val" id="tokEst">0</div><div class="meter-lbl">Estimated tokens</div></div>
+      <div class="meter"><div class="meter-val" id="memBonus">+0</div><div class="meter-lbl">Memory recall bonus</div></div>
+      <div class="meter"><div class="meter-val" id="costSave">92%</div><div class="meter-lbl">Context savings</div></div>
+    </div>
+
+    <div class="actions">
+      <div class="target-bar">
+        <div class="target-badge">
+          <div class="pulse-dot"></div>
+          <span id="activeTargetLabel">Active Target: Auto-Detect Active IDE</span>
+        </div>
+        <div>
+          Target: 
+          <select id="targetSelect" class="target-select">
+            <option value="auto">Auto-Detect Active IDE (Recommended)</option>
+            <option value="lumax">LUMAX Agent (Direct Exec in Kiosk)</option>
+            <option value="antigravity">Antigravity / AGY</option>
+            <option value="vscode">VS Code</option>
+            <option value="cursor">Cursor</option>
+            <option value="windsurf">Windsurf</option>
+            <option value="cline">Cline Agent</option>
+            <option value="hermes">Hermes Agent</option>
+            <option value="codex">Codex / Custom Protocol</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="sendBtn">🚀 Send to Active IDE</button>
+        <button class="btn secondary" id="copyBtn">Copy Prompt</button>
+      </div>
+    </div>
+
+    <div class="preview-box">
+      <div class="preview-header" id="previewHeader">Context & System Preview</div>
+      <div class="preview" id="preview">Preview will appear here...</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">✦ Sent! Prompt dispatched successfully.</div>
+
+  <script>
+    const promptEl = document.getElementById('prompt');
+    const previewEl = document.getElementById('preview');
+    const previewHeader = document.getElementById('previewHeader');
+    const activeTargetLabel = document.getElementById('activeTargetLabel');
+    const targetSelect = document.getElementById('targetSelect');
+    const sendBtn = document.getElementById('sendBtn');
+    const toast = document.getElementById('toast');
+
+    let detectedPrimary = { id: 'antigravity', name: 'Antigravity / AGY', scheme: 'lx://chat?q=' };
+    
+    const SCHEMA_MAP = {
+      lumax: 'direct',
+      antigravity: 'lx://chat?q=',
+      vscode: 'vscode://chat?q=',
+      cursor: 'cursor://chat?q=',
+      windsurf: 'windsurf://chat?q=',
+      hermes: 'hermes://chat?q=',
+      cline: 'cline://chat?q=',
+      codex: 'codex://chat?q='
+    };
+
+    const NAME_MAP = {
+      lumax: 'LUMAX Agent (Direct Exec)',
+      antigravity: 'Antigravity / AGY',
+      vscode: 'VS Code',
+      cursor: 'Cursor',
+      windsurf: 'Windsurf',
+      hermes: 'Hermes Agent',
+      cline: 'Cline Agent',
+      codex: 'Codex'
+    };
+
+    async function checkActiveIDE() {
+      try {
+        const res = await fetch('/api/ide/detect');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.primary) {
+            detectedPrimary = data.primary;
+            if (targetSelect.value === 'auto') {
+              activeTargetLabel.textContent = `Active Target: ${detectedPrimary.name}`;
+            }
+          }
+        }
+      } catch (e) { /* fallback gracefully */ }
+    }
+
+    targetSelect.addEventListener('change', () => {
+      if (targetSelect.value === 'lumax') {
+        activeTargetLabel.textContent = `Target: LUMAX Agent (Direct Exec)`;
+        sendBtn.textContent = '🚀 Execute in LUMAX Agent';
+      } else if (targetSelect.value === 'auto') {
+        activeTargetLabel.textContent = `Active Target: ${detectedPrimary.name}`;
+        sendBtn.textContent = '🚀 Send to Active IDE';
+      } else {
+        const selectedName = NAME_MAP[targetSelect.value] || targetSelect.value;
+        activeTargetLabel.textContent = `Target: ${selectedName}`;
+        sendBtn.textContent = `🚀 Send to ${selectedName.split(' ')[0]}`;
+      }
+    });
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.opacity = '1', 10);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.style.display = 'none', 300);
+      }, 3500);
+    }
+
+    function update() {
+      const text = promptEl.value;
+      const tokens = Math.round(text.length / 4);
+      document.getElementById('tokEst').textContent = tokens.toLocaleString();
+      const bonus = Math.min(2000, Math.round(tokens * .25));
+      document.getElementById('memBonus').textContent = '+' + bonus.toLocaleString();
+      if (previewHeader.textContent === 'Context & System Preview') {
+        previewEl.textContent = `System: You are the LUMAX Diamond Concordia agent with foveated memory active.\n` +
+          `Recall: [CKP:auto] prior related context will be injected.\n` +
+          `User: ${text || '(empty)'}`;
+      }
+    }
+
+    const DEFAULT_DIAGNOSTIC_PROMPT = promptEl.value;
+    const diagChip = document.getElementById('diagChip');
+    if (diagChip) {
+      diagChip.addEventListener('click', () => {
+        promptEl.value = DEFAULT_DIAGNOSTIC_PROMPT;
+        update();
+        showToast('✦ Diagnostic & Stabilization Prompt Loaded');
+      });
+    }
+
+    document.querySelectorAll('.chip:not(#diagChip)').forEach(c => {
+      c.addEventListener('click', () => {
+        c.classList.toggle('active');
+        const tpl = c.dataset.tpl;
+        if (c.classList.contains('active')) {
+          promptEl.value = tpl + '\n\n' + promptEl.value;
+        } else {
+          promptEl.value = promptEl.value.replace(tpl + '\n\n', '').replace(tpl, '');
+        }
+        update();
+      });
+    });
+
+    promptEl.addEventListener('input', update);
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(promptEl.value);
+      const old = document.getElementById('copyBtn').textContent;
+      document.getElementById('copyBtn').textContent = 'Copied!';
+      setTimeout(() => document.getElementById('copyBtn').textContent = old, 1500);
+    });
+
+    sendBtn.addEventListener('click', async () => {
+      const promptText = promptEl.value || '';
+      if (!promptText.trim()) return;
+
+      // Always copy to clipboard for instant Ctrl+V pasting into any agent window
+      navigator.clipboard.writeText(promptText);
+
+      let targetId = targetSelect.value;
+
+      // MODE A: Direct Execution in LUMAX Agent Core
+      if (targetId === 'lumax') {
+        sendBtn.disabled = true;
+        const originalText = sendBtn.textContent;
+        sendBtn.textContent = '⏳ Processing in LUMAX Agent...';
+        previewHeader.textContent = 'LUMAX Agent Response';
+        previewEl.textContent = 'Communicating with LUMAX Foveated Memory Proxy & Sovereign Core...';
+
+        try {
+          const res = await fetch('/api/lumax/dispatch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: promptText })
+          });
+          const data = await res.json();
+          if (res.ok && data.ok) {
+            previewEl.textContent = data.response;
+            showToast('✦ Response received from LUMAX Agent!');
+          } else {
+            previewEl.textContent = `[Error] ${data.error || 'Failed to get response'}`;
+            showToast('⚠️ LUMAX dispatch failed. Check debug log.');
+          }
+        } catch (err) {
+          previewEl.textContent = `[Error] Connection error: ${err.message}`;
+        } finally {
+          sendBtn.disabled = false;
+          sendBtn.textContent = originalText;
+        }
+        return;
+      }
+
+      // MODE B: Send to Single Active IDE / Target
+      let targetName = '';
+      let scheme = '';
+
+      if (targetId === 'auto') {
+        targetId = detectedPrimary.id || 'antigravity';
+        targetName = detectedPrimary.name || 'Active IDE';
+        scheme = detectedPrimary.scheme || 'lx://chat?q=';
+      } else {
+        targetName = NAME_MAP[targetId] || targetId;
+        scheme = SCHEMA_MAP[targetId] || `lx://chat?q=`;
+      }
+
+      const url = `${scheme}${encodeURIComponent(promptText)}`;
+      
+      try {
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        setTimeout(() => iframe.remove(), 2000);
+      } catch (e) {
+        window.location.href = url;
+      }
+
+      showToast(`✦ Prompt sent to ${targetName}! Copied to clipboard.`);
+    });
+
+    update();
+    checkActiveIDE();
+    setInterval(checkActiveIDE, 8000);
+  </script>
+</body>
+</html>

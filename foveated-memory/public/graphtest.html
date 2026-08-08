@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Lumax – Dual Rolling Proxy Tester (Relative Normalization)</title>
+
+    <style>
+        body {
+            background: #05060a;
+            color: #c7e7ff;
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 20px
+        }
+
+        h1 {
+            font-weight: 500;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #7fd0ff;
+            margin-bottom: 16px
+        }
+
+        #topBar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px
+        }
+
+        select,
+        button {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid #273447;
+            background: #0b0d13;
+            color: #c7e7ff;
+            cursor: pointer;
+            font-size: 13px
+        }
+
+        button {
+            border-color: #7fd0ff;
+            background: #0b1620
+        }
+
+        button:hover {
+            background: #102132
+        }
+
+        .graphBox {
+            width: 100%;
+            height: 240px;
+            background: #05070d;
+            border: 1px solid #273447;
+            border-radius: 10px;
+            padding: 6px;
+            box-sizing: border-box;
+            margin-bottom: 8px
+        }
+
+        .graphLabel {
+            color: #7fd0ff;
+            margin-bottom: 6px;
+            font-size: 14px
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%
+        }
+
+        .deltaBox {
+            font-size: 12px;
+            color: #9fd8ff;
+            margin-bottom: 16px
+        }
+
+        #promptBox {
+            margin-top: 18px;
+            width: 100%;
+            height: 240px;
+            background: #0b0d13;
+            color: #c7e7ff;
+            border: 1px solid #273447;
+            border-radius: 10px;
+            padding: 10px;
+            resize: vertical;
+            font-family: "JetBrains Mono", Consolas, monospace;
+            font-size: 13px;
+            white-space: pre-wrap
+        }
+
+        #summary {
+            margin-top: 20px;
+            background: #0b0d13;
+            border: 1px solid #273447;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 13px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px
+        }
+
+        td {
+            padding: 4px 6px;
+            border-bottom: 1px solid #273447
+        }
+
+        .thoughtGrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .thoughtBox {
+            background: #080a10;
+            border: 1px solid #273447;
+            border-radius: 10px;
+            padding: 12px;
+            height: 220px;
+            overflow-y: auto;
+            font-family: "JetBrains Mono", Consolas, monospace;
+            font-size: 12px;
+            color: #94a3b8;
+            white-space: pre-wrap;
+        }
+
+        .thoughtTitle {
+            color: #7fd0ff;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .thoughtTurn {
+            background: #0f172a;
+            border-left: 3px solid #7fd0ff;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .thoughtTurnB {
+            border-left-color: #ff00aa;
+        }
+
+        .promptGrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .promptGroup {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .promptGroup label {
+            color: #7fd0ff;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+
+<body>
+
+    <h1>Lumax – Multi-Lane Rolling Proxy & Model Tester</h1>
+
+    <!-- 1. Top Controls Bar -->
+    <div id="topBar">
+        <button id="startBtn" disabled style="opacity: 0.5; cursor: not-allowed;">🚀 Start 5‑Minute Test</button>
+        <button id="stopBtn">⏹ Stop</button>
+        <button id="resetBtn" style="background: #271924; border: 1px solid #7f295b; color: #ff7fd0;">🧹 Reset Graphs</button>
+        <span id="timer">Idle</span>
+        <span id="statusIndicator" style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: bold; color: #f87171; background: #1f1418; border: 1px solid #7f2937; padding: 4px 10px; border-radius: 20px;">
+            <span style="font-size: 14px;">🔴</span> Checking Models & Proxies…
+        </span>
+        <button id="reloadModelsBtn" style="font-size: 12px; padding: 4px 10px; background: #132438; border: 1px solid #273447; color: #7fd0ff; border-radius: 6px; cursor: pointer;">🔄 Reload Models</button>
+        <label style="font-size: 12px; margin-left: 12px; display: flex; align-items: center; gap: 4px;">
+            <input type="checkbox" id="syncLanesCheck" checked> Sync Lane B to Lane A (Model & Prompt)
+        </label>
+        <button onclick="window.location.href='settings.html'" style="margin-left: auto;">⚙️ Settings Panel</button>
+        <button onclick="window.location.href='index.html'">🧠 Dashboard</button>
+    </div>
+
+    <!-- 2. Step 1: Lane Model & Proxy Setup (Top) -->
+    <div style="margin-top: 14px; margin-bottom: 8px; color: #7fd0ff; font-weight: bold; font-size: 14px;">
+        ⚙️ Step 1: Model & Proxy Lane Setup
+    </div>
+    <div class="laneGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+        <div style="background: #090c14; border: 1px solid #273447; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="color: #7fd0ff; font-weight: bold; font-size: 13px;">🔹 Lane A Setup</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 12px; color: #94a3b8; min-width: 50px;">Model:</span>
+                <select id="modelSelectA" style="flex: 1; background: #0b0d13; color: #7fd0ff; border: 1px solid #273447; border-radius: 6px; padding: 6px; font-size: 12px;"></select>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 12px; color: #94a3b8; min-width: 50px;">Proxy:</span>
+                <select id="proxySelectA" style="flex: 1; background: #0b0d13; color: #7fd0ff; border: 1px solid #273447; border-radius: 6px; padding: 6px; font-size: 12px;">
+                    <option value="http://127.0.0.1:8200/v1/chat/completions">Membrane Proxy (:8200 - Foveated Memory)</option>
+                    <option value="http://127.0.0.1:8106/v1/chat/completions">Raw Benchmark Proxy (:8106)</option>
+                    <option value="http://127.0.0.1:7272/v1/chat/completions">Direct LM Studio (:7272)</option>
+                    <option value="http://127.0.0.1:11434/v1/chat/completions">Direct Ollama (:11434)</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="background: #090c14; border: 1px solid #273447; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="color: #ff00aa; font-weight: bold; font-size: 13px;">🔸 Lane B Setup</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 12px; color: #94a3b8; min-width: 50px;">Model:</span>
+                <select id="modelSelectB" style="flex: 1; background: #0b0d13; color: #ff00aa; border: 1px solid #273447; border-radius: 6px; padding: 6px; font-size: 12px;"></select>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 12px; color: #94a3b8; min-width: 50px;">Proxy:</span>
+                <select id="proxySelectB" style="flex: 1; background: #0b0d13; color: #ff00aa; border: 1px solid #273447; border-radius: 6px; padding: 6px; font-size: 12px;">
+                    <option value="http://127.0.0.1:8106/v1/chat/completions">Raw Benchmark Proxy (:8106)</option>
+                    <option value="http://127.0.0.1:7272/v1/chat/completions">Direct LM Studio (:7272)</option>
+                    <option value="http://127.0.0.1:8200/v1/chat/completions">Membrane Proxy (:8200 - Foveated Memory)</option>
+                    <option value="http://127.0.0.1:11434/v1/chat/completions">Direct Ollama (:11434)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Step 2: Prompts Configuration -->
+    <div style="margin-top: 18px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div style="color: #7fd0ff; font-weight: bold; font-size: 14px;">
+            📝 Step 2: Input Prompts Configuration
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 12px; color: #94a3b8;">Preset Test Prompts:</span>
+            <select id="presetPromptSelect" style="background: #0b0d13; color: #7fd0ff; border: 1px solid #273447; border-radius: 6px; padding: 4px 10px; font-size: 12px; outline: none; cursor: pointer;">
+                <option value="diag10">1. Full 10-Phase Repo Diagnostic & Stabilization (Default Auto-Chosen)</option>
+                <option value="arch_audit">2. Core Architectural & Memory Proxy Audit</option>
+                <option value="perf_refactor">3. High-Concurrency & Latency Optimization</option>
+                <option value="security_sandbox">4. Windows-Native Security & Virtual Environment Audit</option>
+                <option value="custom">5. Custom User-Defined Prompt</option>
+            </select>
+        </div>
+    </div>
+    <div class="promptGrid">
+        <div class="promptGroup" style="background: #090c14; border: 1px solid #273447; border-radius: 12px; padding: 16px; box-sizing: border-box;">
+            <label style="color: #7fd0ff; font-weight: bold; font-size: 13px;">🔹 Lane A Prompt</label>
+            <textarea id="promptBoxA" class="promptBox" style="height: 160px; width: 100%; background: #06080e; color: #c7e7ff; border: 1px solid #1e293b; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; box-sizing: border-box; resize: vertical;"></textarea>
+        </div>
+        <div class="promptGroup" style="background: #090c14; border: 1px solid #273447; border-radius: 12px; padding: 16px; box-sizing: border-box;">
+            <label style="color: #ff00aa; font-weight: bold; font-size: 13px;">🔸 Lane B Prompt</label>
+            <textarea id="promptBoxB" class="promptBox" style="height: 160px; width: 100%; background: #06080e; color: #c7e7ff; border: 1px solid #1e293b; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; box-sizing: border-box; resize: vertical;"></textarea>
+        </div>
+    </div>
+
+    <!-- 4. Step 3: Live Rolling Graphs -->
+    <div class="graphLabel" id="labelLaneA">Lane A (Membrane Proxy :8200)</div>
+    <div class="graphBox"><canvas id="canvasA"></canvas></div>
+    <div class="deltaBox" id="deltaMembrane">ΔCoherence: 0.000 | ΔDrift: 0.000</div>
+
+    <div class="graphLabel" id="labelLaneB" style="color: #ff00aa;">Lane B (Baseline Proxy :8106)</div>
+    <div class="graphBox"><canvas id="canvasB"></canvas></div>
+    <div class="deltaBox" id="deltaBaseline">ΔCoherence: 0.000 | ΔDrift: 0.000</div>
+
+    <!-- 5. Step 4: Thought / Reasoning History Streams -->
+    <div class="thoughtGrid">
+        <div>
+            <div class="thoughtTitle">🧠 Lane A Reasoning Stream</div>
+            <div class="thoughtBox" id="thoughtLogA">Thought stream initializing…</div>
+        </div>
+        <div>
+            <div class="thoughtTitle" style="color: #ff00aa;">🧠 Lane B Reasoning Stream</div>
+            <div class="thoughtBox" id="thoughtLogB">Thought stream initializing…</div>
+        </div>
+    </div>
+
+    <!-- 6. Step 5: Summary Metrics Tables (Per-Lane & Side-by-Side) -->
+    <div style="margin-top: 24px; margin-bottom: 8px; color: #7fd0ff; font-weight: bold; font-size: 14px;">
+        📊 Step 5: Per-Lane Metrics Summary & Comparative Delta
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+        <div style="background: #090c14; border: 1px solid #273447; border-radius: 10px; padding: 14px;">
+            <div style="color: #7fd0ff; font-weight: bold; font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between;" id="summaryTitleA">
+                <span>🔹 Lane A Metrics Summary</span>
+                <span style="font-size: 11px; color: #64748b;" id="summarySubA"></span>
+            </div>
+            <table id="summaryTableA" style="width: 100%; border-collapse: collapse; font-size: 12px;"></table>
+        </div>
+
+        <div style="background: #090c14; border: 1px solid #273447; border-radius: 10px; padding: 14px;">
+            <div style="color: #ff00aa; font-weight: bold; font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between;" id="summaryTitleB">
+                <span>🔸 Lane B Metrics Summary</span>
+                <span style="font-size: 11px; color: #64748b;" id="summarySubB"></span>
+            </div>
+            <table id="summaryTableB" style="width: 100%; border-collapse: collapse; font-size: 12px;"></table>
+        </div>
+    </div>
+
+    <script>
+        // PRESET PROMPTS DICTIONARY
+        const PRESET_PROMPTS = {
+            diag10: `You are an AI diagnostic agent operating inside a repository with Node.js, Python, and TypeScript modules.
+Your task is to run a 10-phase diagnostic and repair cycle turn-by-turn.
+
+Phase 1: Map all files and imports.
+Phase 2: Analyze broken dependencies.
+Phase 3: Inspect logic gaps.
+Phase 4: Analyze failing tests.
+Phase 5: Verify configuration files.
+Phase 6: Propose refactor boundaries.
+Phase 7: List files for repair.
+Phase 8: Provide execution steps.
+Phase 9: Outline test verification.
+Phase 10: Define long-term stability plan.
+
+Keep your response concise, step-by-step, and structured. Begin with Phase 1.`,
+
+            arch_audit: `Perform a deep architectural audit of the Diamond Concordia holonic service topology.
+1. Inspect ports 8000 (Soul), 8200 (Foveated Memory Proxy), 8103 (TokenSlayer Context), 8109 (Stardust Vectors), and 5176/8080 (Frontends).
+2. Evaluate active recall memory latency, system prompt injection safety, and cross-process IPC integrity.
+3. Provide a step-by-step optimization plan for zero-latency memory retrieval under high token throughput.`,
+
+            perf_refactor: `Execute a high-concurrency performance benchmark and refactoring plan:
+1. Analyze asynchronous loop performance and identify non-blocking I/O bottlenecks.
+2. Check memory allocations, garbage collection pressure, and payload serialization overhead.
+3. Propose concrete code edits to maximize requests-per-second while maintaining strict token budget limits.`,
+
+            security_sandbox: `Perform a comprehensive Windows-Native environment and security audit:
+1. Verify strict virtual environment enforcement (.venv) across all service launch commands.
+2. Check file access permissions, subprocess creation flags, and environment variable isolation.
+3. Provide a step-by-step remediation guide to ensure zero unhandled exceptions or leaks.`
+        };
+
+        const promptBoxA = document.getElementById('promptBoxA');
+        const promptBoxB = document.getElementById('promptBoxB');
+        const presetPromptSelect = document.getElementById('presetPromptSelect');
+        const syncLanesCheck = document.getElementById('syncLanesCheck');
+
+        function applyPresetPrompt(key) {
+            if (key === 'custom') return;
+            const text = PRESET_PROMPTS[key] || PRESET_PROMPTS.diag10;
+            promptBoxA.value = text;
+            if (syncLanesCheck && syncLanesCheck.checked) {
+                promptBoxB.value = text;
+            }
+        }
+
+        // Auto-load default preset 1 on init
+        applyPresetPrompt('diag10');
+
+        presetPromptSelect.addEventListener('change', () => {
+            applyPresetPrompt(presetPromptSelect.value);
+        });
+
+        // MODEL LOADING & GREEN LIGHT STATUS CHECK
+        async function checkAndLoadModels() {
+            const selectA = document.getElementById('modelSelectA');
+            const selectB = document.getElementById('modelSelectB');
+            const statusInd = document.getElementById('statusIndicator');
+            const startBtn = document.getElementById('startBtn');
+
+            selectA.innerHTML = '<option>Loading models…</option>';
+            selectB.innerHTML = '<option>Loading models…</option>';
+            statusInd.style.background = '#1f1418';
+            statusInd.style.borderColor = '#7f2937';
+            statusInd.style.color = '#f87171';
+            statusInd.innerHTML = '<span style="font-size: 14px;">🔴</span> Checking Models & Proxies…';
+            startBtn.disabled = true;
+            startBtn.style.opacity = '0.5';
+            startBtn.style.cursor = 'not-allowed';
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 4000);
+                const res = await fetch('http://127.0.0.1:7272/v1/models', { signal: controller.signal });
+                clearTimeout(timeoutId);
+                const data = await res.json();
+                const models = data.data || [];
+
+                selectA.innerHTML = '';
+                selectB.innerHTML = '';
+
+                if (models.length > 0) {
+                    models.forEach(model => {
+                        const optA = document.createElement('option');
+                        optA.value = model.id;
+                        optA.textContent = model.id;
+                        selectA.appendChild(optA);
+
+                        const optB = document.createElement('option');
+                        optB.value = model.id;
+                        optB.textContent = model.id;
+                        selectB.appendChild(optB);
+                    });
+
+                    statusInd.style.background = '#0f291e';
+                    statusInd.style.borderColor = '#15803d';
+                    statusInd.style.color = '#4ade80';
+                    statusInd.innerHTML = `<span style="font-size: 14px;">🟢</span> Ready (${models.length} Model${models.length > 1 ? 's' : ''} Online)`;
+                } else {
+                    selectA.innerHTML = '<option value="default">default (port 8200)</option>';
+                    selectB.innerHTML = '<option value="default">default (port 8106)</option>';
+                    statusInd.style.background = '#292510';
+                    statusInd.style.borderColor = '#a16207';
+                    statusInd.style.color = '#facc15';
+                    statusInd.innerHTML = '<span style="font-size: 14px;">🟡</span> Proxies Online (Fallback Mode)';
+                }
+
+                startBtn.disabled = false;
+                startBtn.style.opacity = '1';
+                startBtn.style.cursor = 'pointer';
+
+            } catch (err) {
+                console.warn('LM Studio check direct timeout/error, enabling proxy mode...');
+                selectA.innerHTML = '<option value="default">default (port 8200)</option>';
+                selectB.innerHTML = '<option value="default">default (port 8106)</option>';
+
+                statusInd.style.background = '#0f291e';
+                statusInd.style.borderColor = '#15803d';
+                statusInd.style.color = '#4ade80';
+                statusInd.innerHTML = '<span style="font-size: 14px;">🟢</span> Proxies Ready (:8200 / :8106)';
+
+                startBtn.disabled = false;
+                startBtn.style.opacity = '1';
+                startBtn.style.cursor = 'pointer';
+            }
+        }
+        checkAndLoadModels();
+
+        document.getElementById('reloadModelsBtn').addEventListener('click', checkAndLoadModels);
+
+        // Sync Lane B (model + prompt) to Lane A if sync checkbox is active
+        const modelSelectA = document.getElementById('modelSelectA');
+        const modelSelectB = document.getElementById('modelSelectB');
+
+        modelSelectA.addEventListener('change', () => {
+            if (syncLanesCheck && syncLanesCheck.checked) {
+                modelSelectB.value = modelSelectA.value;
+            }
+        });
+
+        promptBoxA.addEventListener('input', () => {
+            if (syncLanesCheck && syncLanesCheck.checked) {
+                promptBoxB.value = promptBoxA.value;
+            }
+            presetPromptSelect.value = 'custom';
+        });
+
+        // CANVAS SETUP
+        const canvasA = document.getElementById('canvasA');
+        const canvasB = document.getElementById('canvasB');
+        const ctxA = canvasA.getContext('2d');
+        const ctxB = canvasB.getContext('2d');
+
+        function resizeCanvas(c) {
+            c.width = c.clientWidth;
+            c.height = c.clientHeight;
+        }
+        window.addEventListener('resize', () => {
+            resizeCanvas(canvasA);
+            resizeCanvas(canvasB);
+        });
+        resizeCanvas(canvasA);
+        resizeCanvas(canvasB);
+
+        // BUFFERS + SUMMARY
+        const MAX_POINTS = 300;
+        let memC = [], memD = [], memL = [];
+        let baseC = [], baseD = [], baseL = [];
+        let summaryMem = { coh: 0, drift: 0, ent: 0, comp: 0, lat: 0, hud: 0, ring: 0, rec: 0, count: 0 };
+        let summaryBase = { coh: 0, drift: 0, ent: 0, comp: 0, lat: 0, hud: 0, ring: 0, rec: 0, count: 0 };
+
+        /* -----------------------------
+           REASONING / THOUGHT EXTRACTION
+        ----------------------------- */
+        function extractReasoningAndContent(text) {
+            let reasoning = "";
+            let content = text || "";
+            const match = text.match(/<thought>([\s\S]*?)<\/thought>/i) || text.match(/<think>([\s\S]*?)<\/think>/i);
+            if (match) {
+                reasoning = match[1].trim();
+                content = text.replace(/<thought>[\s\S]*?<\/thought>/gi, '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+            }
+            return { reasoning, content };
+        }
+
+        function appendThoughtLog(boxId, turn, text) {
+            const logEl = document.getElementById(boxId);
+            if (!logEl) return;
+            const { reasoning, content } = extractReasoningAndContent(text);
+            const isB = boxId === 'thoughtLogB';
+
+            const turnDiv = document.createElement('div');
+            turnDiv.className = `thoughtTurn ${isB ? 'thoughtTurnB' : ''}`;
+            
+            let html = `<div style="font-weight: bold; color: ${isB ? '#ff00aa' : '#7fd0ff'}; margin-bottom: 4px;">Turn ${turn}</div>`;
+            if (reasoning) {
+                html += `<div style="color: #fbbf24; font-style: italic; margin-bottom: 4px;">💭 Reasoning:\n${reasoning}</div>`;
+            } else {
+                html += `<div style="color: #64748b; font-style: italic; margin-bottom: 4px;">(No explicit &lt;thought&gt; tags emitted)</div>`;
+            }
+            const snippet = content.length > 200 ? content.substring(0, 200) + '…' : content;
+            html += `<div style="color: #cbd5e1;">💬 Output:\n${snippet}</div>`;
+
+            turnDiv.innerHTML = html;
+            
+            if (logEl.textContent.includes('initializing…')) {
+                logEl.innerHTML = '';
+            }
+            logEl.appendChild(turnDiv);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        /* -----------------------------
+           METRIC EXTRACTION
+        ----------------------------- */
+        function extractMetrics(text, latencyMs) {
+            const cleaned = text.trim();
+            const tokens = cleaned.split(/\s+/).filter(Boolean);
+            const tokenCount = tokens.length;
+
+            const sentences = cleaned.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+            const sentenceCount = sentences.length;
+
+            const charCount = cleaned.length;
+            const uniqueTokens = new Set(tokens.map(t => t.toLowerCase()));
+            const typeTokenRatio = tokenCount > 0 ? uniqueTokens.size / tokenCount : 0;
+
+            const hud = /MEMBRANE HUD|AGENT HUD|FOVEATED MEMORY|XRL CODEBASE INTUITION/i.test(cleaned) ? 1 : 0;
+            const ring = /Ring\s*[0-9]|foveated|periphery|parafovea/i.test(cleaned) ? 1 : 0;
+            const rec = /recall:|active recall|streak/i.test(cleaned) ? 1 : 0;
+            const intent = /goal|intent|task|next steps|pending/i.test(cleaned) ? 1 : 0;
+
+            const entropy = typeTokenRatio * Math.log2(tokenCount + 1);
+            const coherence = sentenceCount > 0 ? Math.min(1, (tokenCount / (sentenceCount * 5)) / 10) : 0;
+            const drift = 1 - intent * 0.2;
+            const comp = charCount > 0 ? (tokenCount / charCount) : 0;
+            const latency = Math.min(1, latencyMs / 2000);
+
+            return { coherence, drift, latency, entropy, comp, hud, ring, rec, text: cleaned };
+        }
+
+        /* -----------------------------
+           PROXY CALLS (MULTI-TURN)
+        ----------------------------- */
+        async function callProxyMessages(url, messages, model) {
+            const start = performance.now();
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal,
+                    body: JSON.stringify({
+                        model: model,
+                        messages: messages,
+                        max_tokens: 350
+                    })
+                });
+                clearTimeout(timeoutId);
+
+                const latency = performance.now() - start;
+                const data = await res.json();
+                const text = data.choices?.[0]?.message?.content || "";
+                const metrics = extractMetrics(text, latency);
+                metrics.rawText = text;
+                return metrics;
+
+            } catch (err) {
+                console.error("Proxy error:", url, err);
+                const metrics = extractMetrics("ERROR", performance.now() - start);
+                metrics.rawText = "ERROR";
+                return metrics;
+            }
+        }
+
+        /* -----------------------------
+           NORMALIZATION + DRAWING
+        ----------------------------- */
+        function normalizeSeries(arr) {
+            if (arr.length === 0) return [];
+            const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+            const variance = arr.reduce((a, b) => a + (b - mean) * (b - mean), 0) / arr.length;
+            const std = Math.sqrt(variance) || 1e-6;
+            return arr.map(v => (v - mean) / std);
+        }
+
+        function mapTo01(v) {
+            const x = (v + 2) / 4;
+            return Math.max(0, Math.min(1, x));
+        }
+
+        function drawLine(ctx, arrNorm, color) {
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            for (let i = 0; i < arrNorm.length; i++) {
+                const x = (i / MAX_POINTS) * ctx.canvas.width;
+                const v01 = mapTo01(arrNorm[i]);
+                const y = ctx.canvas.height - (v01 * ctx.canvas.height);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        function renderGraphs() {
+            ctxA.clearRect(0, 0, canvasA.width, canvasA.height);
+            ctxB.clearRect(0, 0, canvasB.width, canvasB.height);
+
+            const memCNorm = normalizeSeries(memC);
+            const memDNorm = normalizeSeries(memD);
+            const memLNorm = normalizeSeries(memL);
+
+            const baseCNorm = normalizeSeries(baseC);
+            const baseDNorm = normalizeSeries(baseD);
+            const baseLNorm = normalizeSeries(baseL);
+
+            drawLine(ctxA, memCNorm, "#7fd0ff");
+            drawLine(ctxA, memDNorm, "#ff7f7f");
+            drawLine(ctxA, memLNorm, "#7fff7f");
+
+            drawLine(ctxB, baseCNorm, "#00c8ff");
+            drawLine(ctxB, baseDNorm, "#ffb3b3");
+            drawLine(ctxB, baseLNorm, "#b3ffb3");
+        }
+
+        /* -----------------------------
+           SUMMARY TABLES (PER LANE)
+        ----------------------------- */
+        function updateSummary() {
+            const tableA = document.getElementById('summaryTableA');
+            const tableB = document.getElementById('summaryTableB');
+            const modelA = document.getElementById('modelSelectA').value || "default";
+            const modelB = document.getElementById('modelSelectB').value || "default";
+            const proxyA = document.getElementById('proxySelectA').selectedOptions[0]?.text || ":8200";
+            const proxyB = document.getElementById('proxySelectB').selectedOptions[0]?.text || ":8106";
+
+            document.getElementById('summarySubA').textContent = `Model: ${modelA} | ${proxyA}`;
+            document.getElementById('summarySubB').textContent = `Model: ${modelB} | ${proxyB}`;
+
+            function renderTable(tableEl, summary, otherSummary, isA) {
+                if (summary.count === 0) {
+                    tableEl.innerHTML = `<tr><td style="color:#64748b; padding: 12px 0;">Waiting for data…</td></tr>`;
+                    return;
+                }
+                const cnt = summary.count;
+                const oCnt = otherSummary.count || 1;
+
+                const c = summary.coh / cnt;
+                const d = summary.drift / cnt;
+                const e = summary.ent / cnt;
+                const comp = summary.comp / cnt;
+                const lat = summary.lat / cnt;
+                const hud = summary.hud / cnt;
+                const rec = summary.rec / cnt;
+
+                const oC = otherSummary.coh / oCnt;
+                const oD = otherSummary.drift / oCnt;
+
+                const deltaC = isA ? (c - oC) : (c - oC);
+                const deltaD = isA ? (d - oD) : (d - oD);
+
+                function formatRow(metric, val, delta, unit = "") {
+                    const deltaStr = delta !== null ? `<span style="font-size: 11px; color: ${delta >= 0 ? '#4ade80' : '#f87171'};"> (${delta >= 0 ? '+' : ''}${delta.toFixed(3)})</span>` : '';
+                    return `<tr style="border-bottom: 1px solid #1e293b;">
+                        <td style="padding: 6px 0; color: #94a3b8; font-weight: 500;">${metric}</td>
+                        <td style="text-align: right; font-weight: bold; color: #e2e8f0;">${val.toFixed(3)}${unit}${deltaStr}</td>
+                    </tr>`;
+                }
+
+                tableEl.innerHTML = `
+                    ${formatRow("Average Coherence", c, otherSummary.count ? deltaC : null)}
+                    ${formatRow("Average Intent Drift", d, otherSummary.count ? deltaD : null)}
+                    ${formatRow("Average Entropy", e, null)}
+                    ${formatRow("Compression Ratio", comp, null)}
+                    ${formatRow("Average Latency Score", lat, null)}
+                    ${formatRow("Foveated Memory HUD Hits", hud * 100, null, "%")}
+                    ${formatRow("Active Recall Rate", rec * 100, null, "%")}
+                    <tr style="border-top: 1px solid #334155;">
+                        <td style="padding: 6px 0; color: #64748b;">Total Evaluated Turns</td>
+                        <td style="text-align: right; color: #7fd0ff; font-weight: bold;">${cnt} turns</td>
+                    </tr>
+                `;
+            }
+
+            renderTable(tableA, summaryMem, summaryBase, true);
+            renderTable(tableB, summaryBase, summaryMem, false);
+        }
+
+        /* -----------------------------
+           AUTONOMOUS MULTI-TURN LOOP
+        ----------------------------- */
+        let historyStore = [];
+        let messagesMem = [];
+        let messagesBase = [];
+        let turnCount = 0;
+        let intervalId = null;
+        let remainingSeconds = 0;
+        let isUpdating = false;
+
+        function getPromptA() {
+            const box = document.getElementById('promptBoxA');
+            return (box && box.value && box.value.trim()) ? box.value.trim() : "System diagnostic test.";
+        }
+
+        function getPromptB() {
+            const box = document.getElementById('promptBoxB');
+            return (box && box.value && box.value.trim()) ? box.value.trim() : "System diagnostic test.";
+        }
+
+        function resetConversation() {
+            const pA = getPromptA();
+            const pB = getPromptB();
+            const autonomousDirective = `[AUTONOMOUS OPERATIONAL DIRECTIVE]
+You are operating completely on your own in autonomous problem-solving mode. 
+DO NOT ask the user any questions, request clarification, or wait for input. 
+Your task is to execute the diagnostic and repair instructions turn-by-turn until completion.`;
+
+            messagesMem = [{ role: "user", content: `${autonomousDirective}\n\n${pA}` }];
+            messagesBase = [{ role: "user", content: `${autonomousDirective}\n\n${pB}` }];
+            turnCount = 1;
+
+            document.getElementById('thoughtLogA').innerHTML = 'Thought stream starting…';
+            document.getElementById('thoughtLogB').innerHTML = 'Thought stream starting…';
+        }
+
+        function addToHistory(text) {
+            if (text) historyStore.push(text);
+        }
+
+        function compressHistory() {
+            if (historyStore.length > 50) {
+                historyStore = historyStore.slice(-20);
+            }
+        }
+
+        async function update() {
+            if (isUpdating) return;
+            isUpdating = true;
+            try {
+                const modelA = document.getElementById('modelSelectA').value || "default";
+                const modelB = document.getElementById('modelSelectB').value || "default";
+
+                const urlA = document.getElementById('proxySelectA').value || "http://127.0.0.1:8200/v1/chat/completions";
+                const urlB = document.getElementById('proxySelectB').value || "http://127.0.0.1:8106/v1/chat/completions";
+
+                if (messagesMem.length === 0) {
+                    resetConversation();
+                } else if (turnCount > 1) {
+                    const continuePrompt = `[AUTONOMOUS TURN ${turnCount}] Continue directly to the next phase/step of the diagnostic and repair plan. Do not ask the user any questions. Execute the next step immediately.`;
+                    messagesMem.push({ role: "user", content: continuePrompt });
+                    messagesBase.push({ role: "user", content: continuePrompt });
+                }
+
+                const [mem, base] = await Promise.all([
+                    callProxyMessages(urlA, messagesMem, modelA),
+                    (async () => {
+                        let res = await callProxyMessages(urlB, messagesBase, modelB);
+                        if (res.text === "ERROR" && urlB.includes(":8106")) {
+                            res = await callProxyMessages("http://127.0.0.1:7272/v1/chat/completions", messagesBase, modelB);
+                        }
+                        return res;
+                    })()
+                ]);
+
+                // Append assistant responses into multi-turn history & thought streams
+                if (mem.rawText && mem.rawText !== "ERROR") {
+                    messagesMem.push({ role: "assistant", content: mem.rawText });
+                    appendThoughtLog('thoughtLogA', turnCount, mem.rawText);
+                } else {
+                    appendThoughtLog('thoughtLogA', turnCount, "⚠️ [Proxy Connection Error or Timeout]");
+                }
+
+                if (base.rawText && base.rawText !== "ERROR") {
+                    messagesBase.push({ role: "assistant", content: base.rawText });
+                    appendThoughtLog('thoughtLogB', turnCount, base.rawText);
+                } else {
+                    appendThoughtLog('thoughtLogB', turnCount, "⚠️ [Proxy Connection Error or Timeout]");
+                }
+
+                function push(arr, val) {
+                    arr.push(val);
+                    if (arr.length > MAX_POINTS) arr.shift();
+                }
+
+                push(memC, mem.coherence);
+                push(memD, mem.drift);
+                push(memL, mem.latency);
+
+                push(baseC, base.coherence);
+                push(baseD, base.drift);
+                push(baseL, base.latency);
+
+                summaryMem.coh += mem.coherence;
+                summaryMem.drift += mem.drift;
+                summaryMem.ent += mem.entropy;
+                summaryMem.comp += mem.comp;
+                summaryMem.lat += mem.latency;
+                summaryMem.hud += mem.hud;
+                summaryMem.ring += mem.ring;
+                summaryMem.rec += mem.rec;
+                summaryMem.count++;
+
+                summaryBase.coh += base.coherence;
+                summaryBase.drift += base.drift;
+                summaryBase.ent += base.entropy;
+                summaryBase.comp += base.comp;
+                summaryBase.lat += base.latency;
+                summaryBase.hud += base.hud;
+                summaryBase.ring += base.ring;
+                summaryBase.rec += base.rec;
+                summaryBase.count++;
+
+                addToHistory(mem.text);
+                addToHistory(base.text);
+
+                if (summaryMem.count % 20 === 0) {
+                    compressHistory();
+                }
+
+                renderGraphs();
+                updateSummary();
+
+                const deltaC = mem.coherence - base.coherence;
+                const deltaD = mem.drift - base.drift;
+
+                document.getElementById('deltaMembrane').textContent =
+                    `ΔCoherence: ${deltaC.toFixed(3)} | ΔDrift: ${deltaD.toFixed(3)} (Turn ${turnCount})`;
+
+                document.getElementById('deltaBaseline').textContent =
+                    `ΔCoherence: ${(-deltaC).toFixed(3)} | ΔDrift: ${(-deltaD).toFixed(3)} (Turn ${turnCount})`;
+
+                turnCount++;
+            } catch (err) {
+                console.error("Autonomous update loop error:", err);
+            } finally {
+                isUpdating = false;
+            }
+        }
+
+        function startTest() {
+            if (intervalId) return;
+            resetConversation();
+            remainingSeconds = 5 * 60;
+            document.getElementById('timer').textContent = "Running: 5:00 (Turn 1)";
+
+            update();
+            intervalId = setInterval(() => {
+                remainingSeconds--;
+                const m = Math.floor(remainingSeconds / 60);
+                const s = remainingSeconds % 60;
+                document.getElementById('timer').textContent =
+                    `Running: ${m}:${String(s).padStart(2, '0')} (Turn ${turnCount})`;
+
+                if (!isUpdating) {
+                    update();
+                }
+
+                if (remainingSeconds <= 0) {
+                    stopTest();
+                    document.getElementById('timer').textContent = "Finished";
+                }
+            }, 1000);
+        }
+
+        function stopTest() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+            messagesMem = [];
+            messagesBase = [];
+            turnCount = 0;
+        }
+
+        function resetGraphs() {
+            stopTest();
+            memC = []; memD = []; memL = [];
+            baseC = []; baseD = []; baseL = [];
+            summaryMem = { coh: 0, drift: 0, ent: 0, comp: 0, lat: 0, hud: 0, ring: 0, rec: 0, count: 0 };
+            summaryBase = { coh: 0, drift: 0, ent: 0, comp: 0, lat: 0, hud: 0, ring: 0, rec: 0, count: 0 };
+            messagesMem = [];
+            messagesBase = [];
+            turnCount = 0;
+
+            document.getElementById('thoughtLogA').innerHTML = 'Thought stream reset.';
+            document.getElementById('thoughtLogB').innerHTML = 'Thought stream reset.';
+            document.getElementById('timer').textContent = 'Idle (Reset)';
+            document.getElementById('deltaMembrane').textContent = 'ΔCoherence: 0.000 | ΔDrift: 0.000 (Reset)';
+            document.getElementById('deltaBaseline').textContent = 'ΔCoherence: 0.000 | ΔDrift: 0.000 (Reset)';
+
+            renderGraphs();
+            updateSummary();
+        }
+
+        document.getElementById('startBtn').addEventListener('click', startTest);
+        document.getElementById('stopBtn').addEventListener('click', stopTest);
+        document.getElementById('resetBtn').addEventListener('click', resetGraphs);
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+# XRLF Runtime — Python Dependencies
+# Install into the project venv:
+#   python -m venv venv
+#   .\venv\Scripts\Activate.ps1
+#   pip install -r requirements.txt
+
+# Core inference engine
+# For CUDA support (recommended for Gemma-4-12B):
+#   pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
+# CPU only:
+#   pip install llama-cpp-python
+llama-cpp-python>=0.3.0
+
+# REST API
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.0
+
+# Binary encoding (optional but recommended — falls back to JSON)
+msgpack>=1.0.7
+
+# YAML config
+pyyaml>=6.0.1
+
+# Token counting for memory budget enforcement (optional)
+tiktoken>=0.7.0
+
+# Standard lib — no install needed:
+#   struct, sqlite3, mmap, json, re, math, wave, tempfile, subprocess, etc.

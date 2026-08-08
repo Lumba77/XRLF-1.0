@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUMAX Concordia Settings Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <header>
+    <h1>⚙️ LUMAX Concordia Settings</h1>
+    <div class="status">
+      <button onclick="openPage('/graphtest.html')" class="pill pill-accent">📊 Dual Proxy Graph Test</button>
+      <span id="proxyStatus" class="pill offline">Proxy: checking…</span>
+      <span id="memCount" class="pill">Memories: —</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <!-- Stack Control -->
+      <section class="card">
+        <h2>🚀 Stack Control</h2>
+        <div class="row"><label>Full Stack</label><div class="btn-grid"><button onclick="call('start-stack')">Start</button><button onclick="call('stop-stack')" class="danger">Stop</button></div></div>
+        <div class="row"><label>Tray Hub</label><button onclick="call('open-tray')">Open Tray</button></div>
+        <div class="row"><label>Super Terminal</label><button onclick="call('open-terminal')">Open WT</button></div>
+        <div class="row"><label>Debug Terminal</label><button onclick="call('open-debug-terminal')">Open Debug Terminal</button></div>
+      </section>
+
+      <!-- Memory Tools -->
+      <section class="card">
+        <h2>🧠 Memory Tools</h2>
+        <div class="row"><label>AUI Dashboard</label><button onclick="openPage('/memory')">Open AUI</button></div>
+        <div class="row"><label>Prompt Kiosk</label><button onclick="openPage('/memory/prompt-kiosk.html')">Open Kiosk</button></div>
+        <div class="row"><label>Dual Proxy Graph Test</label><button onclick="openPage('/graphtest.html')">Open Graph Test</button></div>
+        <div class="row"><label>Memory Meter</label><button onclick="call('show-meter')">Refresh</button></div>
+      </section>
+
+      <!-- Voice & STT / Push-to-Talk -->
+      <section class="card">
+        <h2>🎙️ Voice & Push-to-Talk</h2>
+        <div class="row"><label>Voice Output (TTS)</label><div class="btn-grid"><button id="voiceOn" onclick="toggle('voice', true)">On</button><button id="voiceOff" onclick="toggle('voice', false)">Off</button></div></div>
+        <div class="row"><label>Microphone Mode</label><div class="btn-grid"><button id="micOn" onclick="toggle('mic', true)">On</button><button id="micOff" onclick="toggle('mic', false)">Off</button></div></div>
+        <div class="row"><label>Push-to-Talk</label><div class="btn-grid"><button id="pttModeOff" onclick="togglePtt(false)">Continuous VAD</button><button id="pttModeOn" onclick="togglePtt(true)">Push-to-Talk</button></div></div>
+        <div class="row"><label>Talk to AI</label><button onclick="openPage('http://127.0.0.1:8080')">Open Chat</button></div>
+        <div class="row"><label>Quick Controls</label><button onclick="call('open-quick-controls')">Launch Quick Overlay</button></div>
+      </section>
+
+      <!-- 📱 UI Shell Preference -->
+      <section class="card">
+        <h2>📱 UI Shell Preference</h2>
+        <div class="row"><label>Active Desktop UI</label>
+          <div class="btn-grid">
+            <button id="shellCorner" onclick="toggleSetting('LUMAX_UI_SHELL', 'corner'); call('open-corner-companion');">Corner Companion (Bottom-Right)</button>
+            <button id="shellTopBar" onclick="toggleSetting('LUMAX_UI_SHELL', 'topbar'); call('open-topbar');">TopBar (Top Edge)</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Frontend Selector -->
+      <section class="card">
+        <h2>🖥️ Frontend Selector</h2>
+        <div class="row"><label>Active Frontend</label>
+          <div class="btn-grid">
+            <button id="frontend3d" onclick="setFrontend('3d_avatar')">3D Avatar Chatbot (Port 8080)</button>
+            <button id="frontendXr" onclick="setFrontend('xr_vessel')">XR Vessel (Port 5176)</button>
+          </div>
+        </div>
+        <div class="row"><label>Tunnel Target</label><span id="tunnelTarget" class="pill">—</span></div>
+      </section>
+
+      <!-- Main Project Engine & Models -->
+      <section class="card">
+        <h2>🤖 Main Project Model & Engine Settings</h2>
+        <div class="row"><label for="mainProjectModel">Main LLM Model</label>
+          <select id="mainProjectModel" aria-label="Main LLM Model" onchange="toggleSetting('LUMAX_MODEL_LOCAL_ID', this.value)">
+            <option value="qwopus3.5-9b-coder-mtp-moq">🚀 QwOpus 3.5 9B Coder MTP MoQ (Deep Coder - Ultra Fast)</option>
+            <option value="qwen3.5-4b-moq">⚡ Qwen MoQ 4B + MTP (1.88GB VRAM - Ultra Fast 32K Context)</option>
+            <option value="w-ahmad/gemma-4-12b-it-qat-gguf-moq/moq-3.5.gguf">🧠 Gemma 4 12B MoQ (5.0GB VRAM - Deep Reasoning)</option>
+          </select>
+        </div>
+        <div class="row"><label for="mainEngineProvider">Main Engine Provider</label>
+          <select id="mainEngineProvider" aria-label="Main Engine Provider" onchange="toggleSetting('LUMAX_LLM_PROVIDER', this.value)">
+            <option value="lmstudio">LM Studio Local Server (:7272)</option>
+            <option value="ollama">Ollama Local Server (:11434)</option>
+            <option value="unsloth">Unsloth Worker (:8888)</option>
+            <option value="cloud">Cloud Direct API</option>
+          </select>
+        </div>
+        <div class="row"><label>Model Thinking / Reasoning</label>
+          <div class="btn-grid">
+            <button id="thinkOff" onclick="toggleSetting('LUMAX_MODEL_THINKING', 'false')">Instruct (Fast)</button>
+            <button id="thinkOn" onclick="toggleSetting('LUMAX_MODEL_THINKING', 'true')">Reasoning</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Smart Router & Proxy Model Settings -->
+      <section class="card">
+        <h2>⚡ Smart Router & Foveated Memory Proxy</h2>
+        <div class="row"><label>Smart Context Router</label><div class="btn-grid"><button id="smartRouterOn" onclick="toggleSetting('LUMAX_SMART_PROXY', 'true')">On</button><button id="smartRouterOff" onclick="toggleSetting('LUMAX_SMART_PROXY', 'false')">Off</button></div></div>
+        <div class="row"><label>XRL Auto-Checkpoint</label><div class="btn-grid"><button id="autoCkpOn" onclick="toggleSetting('LUMAX_PROXY_AUTO_CHECKPOINT', 'true')">On (8 Turns)</button><button id="autoCkpOff" onclick="toggleSetting('LUMAX_PROXY_AUTO_CHECKPOINT', 'false')">Off</button></div></div>
+        <div class="row"><label for="compressorModel">Proxy Summarizer Model</label>
+          <select id="compressorModel" aria-label="Proxy Summarizer Model" onchange="toggleSetting('LUMAX_COMPRESSOR_MODEL', this.value)">
+            <option value="qwen3.5-4b-abliterated">qwen3.5-4b-abliterated (Fast 4B Summarizer)</option>
+            <option value="smart-router_gguf">smart-router_gguf (800MB Light Router)</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Model & Persona Reasoning -->
+      <section class="card">
+        <h2>🎭 Model & Persona Reasoning</h2>
+        <div class="row"><label>Proxy Route</label><div class="btn-grid"><button id="routeCloud" onclick="setRoute('cloud')">Cloud</button><button id="routeLocal" onclick="setRoute('local')">Local</button></div></div>
+        <div class="row"><label>Anti-Alignment Protocol</label><span class="pill online">Active (Jen Persona)</span></div>
+        <div class="row"><label for="fovea">Foveation</label>
+          <select id="fovea" aria-label="Foveation Level" onchange="setFovea(this.value)">
+            <option value="0">Auto</option>
+            <option value="1">Max Compression</option>
+            <option value="2">Aggressive</option>
+            <option value="3">Balanced</option>
+            <option value="4">Conservative</option>
+            <option value="5">Minimal</option>
+            <option value="6">Off</option>
+          </select>
+        </div>
+        <div class="row"><label for="cap">Cloud Cap</label><input type="number" id="cap" aria-label="Cloud Cap Tokens" value="0" min="0" step="1000" onchange="setCap(this.value)"></div>
+        <div class="row"><label for="preserve">Preserve Last</label><input type="number" id="preserve" aria-label="Preserve Last Messages" value="10" min="0" max="50" onchange="setPreserve(this.value)"></div>
+      </section>
+
+      <!-- VRAM / Models -->
+      <section class="card">
+        <h2>🧹 VRAM & Memory Operations</h2>
+        <div class="row"><label>LM Studio</label><button onclick="call('unload-lm')">Unload Models</button></div>
+        <div class="row"><label>Local Models</label><button onclick="call('restart-local')">Restart Local Engine</button></div>
+        <div class="row"><label>Foveated Memory Proxy</label><button onclick="call('restart-proxy')">Restart Proxy (8200)</button></div>
+      </section>
+    </div>
+
+    <div class="card card-full">
+      <h2>📜 Event Log</h2>
+      <div id="log" class="log"></div>
+    </div>
+  </main>
+
+  <script>
+    const API = 'http://127.0.0.1:8200';
+    const logEl = document.getElementById('log');
+    function log(msg) { logEl.textContent += `\n[${new Date().toLocaleTimeString()}] ${msg}`; logEl.scrollTop = logEl.scrollHeight; }
+
+    async function health() {
+      try {
+        const r = await fetch(`${API}/health`);
+        if (!r.ok) throw new Error('not ok');
+        const j = await r.json();
+        const el = document.getElementById('proxyStatus');
+        el.textContent = `Proxy: ${j.mode || 'online'}`;
+        el.className = 'pill online';
+        document.getElementById('memCount').textContent = `Memories: ${j.stored_messages ?? '—'}`;
+        return j;
+      } catch (e) {
+        document.getElementById('proxyStatus').textContent = 'Proxy: offline';
+        document.getElementById('proxyStatus').className = 'pill offline';
+        return null;
+      }
+    }
+
+    async function call(action) {
+      log(`Calling ${action}…`);
+      try {
+        const r = await fetch(`${API}/api/control`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({action})
+        });
+        const txt = await r.text();
+        log(`${action}: ${r.status} ${txt}`);
+      } catch (e) { log(`${action} failed: ${e.message}`); }
+    }
+
+    function openPage(path) {
+      const url = path.startsWith('http') ? path : `http://127.0.0.1:8201${path}`;
+      window.open(url, '_blank');
+      log(`Opened ${url}`);
+    }
+
+    async function toggle(name, value) {
+      log(`Setting ${name} = ${value}`);
+      try {
+        const r = await fetch(`${API}/api/toggle`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({name, value})
+        });
+        log(`${name} => ${value} (${r.status})`);
+        updateToggleButtons(name, value);
+      } catch (e) { log(`${name} toggle failed: ${e.message}`); }
+    }
+
+    async function setFrontend(ui) {
+      log(`Switching frontend to ${ui}…`);
+      try {
+        const r = await fetch(`${API}/api/setting`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({key: 'LUMAX_FRONTEND_UI_PRESET', val: ui})
+        });
+        const txt = await r.text();
+        log(`Frontend => ${ui} (${r.status}) ${txt}`);
+        updateFrontend(ui);
+      } catch (e) { log(`frontend switch failed: ${e.message}`); }
+    }
+
+    async function setRoute(mode) {
+      log(`Switching route to ${mode}…`);
+      try {
+        const r = await fetch(`${API}/api/route`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({mode})});
+        log(`Route => ${mode} (${r.status})`);
+        updateRoute(mode);
+      } catch (e) { log(`route failed: ${e.message}`); }
+    }
+
+    async function setFovea(level) {
+      log(`Setting foveation level ${level}…`);
+      try {
+        const r = await fetch(`${API}/api/fovea`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({level: parseInt(level, 10)})});
+        log(`Fovea => ${level} (${r.status})`);
+      } catch (e) { log(`fovea failed: ${e.message}`); }
+    }
+
+    async function setCap(v) {
+      log(`Setting cloud cap ${v}…`);
+      try {
+        const r = await fetch(`${API}/api/cap`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cap: parseInt(v,10)})});
+        log(`Cap => ${v} (${r.status})`);
+      } catch (e) { log(`cap failed: ${e.message}`); }
+    }
+
+    async function setPreserve(v) {
+      log(`Setting preserve_last ${v}…`);
+      try {
+        const r = await fetch(`${API}/api/preserve`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({preserve: parseInt(v,10)})});
+        log(`Preserve => ${v} (${r.status})`);
+      } catch (e) { log(`preserve failed: ${e.message}`); }
+    }
+
+    async function toggleSetting(key, val) {
+      log(`Setting ${key} = ${val}`);
+      try {
+        const r = await fetch(`${API}/api/setting`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ key, val })
+        });
+        const txt = await r.text();
+        log(`${key} => ${val} (${r.status}) ${txt}`);
+        syncAllButtons();
+      } catch (e) { log(`${key} update failed: ${e.message}`); }
+    }
+
+    function updateToggleButtons(name, value) {
+      const on = document.getElementById(name + 'On');
+      const off = document.getElementById(name + 'Off');
+      if (on && off) {
+        on.classList.toggle('active', value);
+        off.classList.toggle('active', !value);
+      }
+    }
+
+    async function togglePtt(enabled) {
+      log(`Setting Push-to-Talk = ${enabled}`);
+      toggleSetting('LUMAX_MIC_PTT', enabled ? 'true' : 'false');
+      document.getElementById('pttModeOn').classList.toggle('active', enabled);
+      document.getElementById('pttModeOff').classList.toggle('active', !enabled);
+    }
+
+    function updateRoute(mode) {
+      document.getElementById('routeCloud').classList.toggle('active', mode === 'cloud');
+      document.getElementById('routeLocal').classList.toggle('active', mode === 'local');
+    }
+
+    function updateFrontend(ui) {
+      document.getElementById('frontend3d').classList.toggle('active', ui === '3d_avatar');
+      document.getElementById('frontendXr').classList.toggle('active', ui === 'xr_vessel');
+    }
+
+    async function loadEnv() {
+      try {
+        const r = await fetch(`${API}/api/env`);
+        if (!r.ok) throw new Error('not ok');
+        const e = await r.json();
+        document.getElementById('cap').value = e.LUMAX_CLOUD_MAX_TOKENS_CAP || 0;
+        document.getElementById('preserve').value = e.LUMAX_CLOUD_PRESERVE_LAST || 10;
+        document.getElementById('fovea').value = e.LUMAX_PROXY_AGGRESSION || 0;
+        
+        const mainModelEl = document.getElementById('mainProjectModel');
+        if (mainModelEl) mainModelEl.value = e.LUMAX_MODEL_LOCAL_ID || 'qwopus3.5-9b-coder-mtp-moq';
+        
+        const mainProviderEl = document.getElementById('mainEngineProvider');
+        if (mainProviderEl) mainProviderEl.value = e.LUMAX_LLM_PROVIDER || 'lmstudio';
+
+        const compModelEl = document.getElementById('compressorModel');
+        if (compModelEl) compModelEl.value = e.LUMAX_COMPRESSOR_MODEL || 'qwen3.5-4b-abliterated';
+
+        updateRoute((e.LUMAX_COGNITIVE_MODE || 'local') === 'cloud' ? 'cloud' : 'local');
+        updateFrontend((e.LUMAX_FRONTEND_UI || '3d_avatar').toLowerCase());
+        updateToggleButtons('voice', (e.LUMAX_VOICE_ENABLED || '').toLowerCase() === 'true');
+        updateToggleButtons('mic', (e.LUMAX_MIC_ENABLED || '').toLowerCase() === 'true');
+        document.getElementById('pttModeOn').classList.toggle('active', (e.LUMAX_MIC_PTT || '').toLowerCase() === 'true');
+        document.getElementById('pttModeOff').classList.toggle('active', (e.LUMAX_MIC_PTT || '').toLowerCase() !== 'true');
+        document.getElementById('thinkOn').classList.toggle('active', (e.LUMAX_MODEL_THINKING || '').toLowerCase() === 'true');
+        document.getElementById('thinkOff').classList.toggle('active', (e.LUMAX_MODEL_THINKING || '').toLowerCase() === 'false');
+        document.getElementById('smartRouterOn').classList.toggle('active', (e.LUMAX_SMART_PROXY || '').toLowerCase() === 'true');
+        document.getElementById('smartRouterOff').classList.toggle('active', (e.LUMAX_SMART_PROXY || '').toLowerCase() === 'false');
+        document.getElementById('autoCkpOn').classList.toggle('active', (e.LUMAX_PROXY_AUTO_CHECKPOINT || '').toLowerCase() !== 'false');
+        document.getElementById('autoCkpOff').classList.toggle('active', (e.LUMAX_PROXY_AUTO_CHECKPOINT || '').toLowerCase() === 'false');
+        document.getElementById('shellCorner').classList.toggle('active', (e.LUMAX_UI_SHELL || 'corner').toLowerCase() === 'corner');
+        document.getElementById('shellTopBar').classList.toggle('active', (e.LUMAX_UI_SHELL || '').toLowerCase() === 'topbar');
+        document.getElementById('tunnelTarget').textContent = e.VITE_URL || '—';
+        log('Loaded current .env values cleanly');
+      } catch (err) {
+        log(`Could not load .env values: ${err.message}`);
+      }
+    }
+
+    async function syncAllButtons() {
+      await loadEnv();
+    }
+
+    async function fetchOllamaModels() {
+      try {
+        const r = await fetch('http://127.0.0.1:11434/api/tags');
+        if (!r.ok) return;
+        const j = await r.json();
+        const models = j.models || [];
+        const select = document.getElementById('mainProjectModel');
+        if (!select) return;
+        const existingValues = Array.from(select.options).map(o => o.value);
+        models.forEach(m => {
+          if (!existingValues.includes(m.name)) {
+            const opt = document.createElement('option');
+            opt.value = m.name;
+            opt.textContent = `🤖 ${m.name} (${(m.size / (1024*1024*1024)).toFixed(1)} GB)`;
+            select.appendChild(opt);
+          }
+        });
+        log(`Fetched ${models.length} local Ollama models dynamically`);
+      } catch (err) {
+        log(`Ollama dynamic models check offline/bypassed`);
+      }
+    }
+
+    async function init() {
+      await loadEnv();
+      await fetchOllamaModels();
+      const h = await health();
+      if (h) {
+        updateRoute(h.mode === 'CLOUD' ? 'cloud' : 'local');
+      }
+      setInterval(health, 5000);
+    }
+    init();
+  </script>
+</body>
+</html>
