@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -9,34 +9,68 @@ venv/
 node_modules/
 package-lock.json
 
-# Secrets
+# Secrets & auth
 .env
+.env.*
+.npmrc
 *.key
 *.pem
 *.token
+*.secret
 
-# Model weights (too large for git)
+# Model weights & generated output (go to lumax-forge/XRLF instead)
 *.gguf
 *.xrlf
 *.safetensors
 *.ckpt
 *.pth
 *.BF16.gguf
+xrl_encoded/
 
-# Runtime data
-memory_data/
+# Training run outputs & benchmarks
 outputs/
 checkpoints/
+unsloth_compiled_cache/
+benchmark_results_*.json
+conciseness_dataset.jsonl
+*_dataset.jsonl
+*_dataset.json
+
+# Runtime / session data
+memory_data/
+*.db
 *.log
 *.log.err
 
-# IDE / OS
+# AI coding tool state (never publish)
+.sidecar/
+.codersinflow/
+.claude/
+.antigravitycli/
+.cursorrules/
+.kilocode/
+.roo/
+.feeder/
+.backup_fixes/
+.lumax/
+.agent/
+.agents/
+.ai/
+.gemini/
+.iwsdk/
+.nexysync/
+
+# IDE & OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+*.code-workspace
+
+# Misc junk
+$null
+implementation_plan.md
+repo-skeleton.md
 
 # Build artifacts
-unsloth_compiled_cache/
-__pycache__/
 *.whl
