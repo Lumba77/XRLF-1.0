@@ -1,6 +1,6 @@
 {
   "name": "xrlf-server",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "XRLF Protocol — Universal OpenAI-compatible proxy that gives any LLM foveated ring memory, active recall, and cognitive steering. Point LM Studio, Ollama, or any OpenAI SDK at http://127.0.0.1:8300/v1 and it just works.",
   "main": "server.js",
   "bin": {

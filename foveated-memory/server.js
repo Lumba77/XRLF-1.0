@@ -2661,28 +2661,8 @@ _server.listen(config.proxy_port, '127.0.0.1', () => {
         if (err) console.error(`[Tunnel Error] ${err}`);
     });
 
-    // Auto-load configured models in LM Studio on startup
-    const modelsToLoad = [...new Set([MIDDLEMAN_MODEL, UPSTREAM_MODEL])].filter(Boolean);
-    console.log(`[Startup] Ensuring required models are loaded in LM Studio: ${modelsToLoad.join(', ')}`);
-    
-    execFile('lms', ['ps'], { timeout: 15000, windowsHide: true }, (err, stdout) => {
-        modelsToLoad.forEach(modelId => {
-            // We use 'lms ps' because LM Studio's HTTP API is known to have a bug where it 
-            // hides models from scripts, causing duplicate loading and OOM crashes. 'lms ps' is reliable.
-            if (!err && stdout && stdout.includes(modelId)) {
-                console.log(`[Startup] ✅ ${modelId} is already loaded in LM Studio. Skipping load to protect VRAM.`);
-            } else {
-                console.log(`[Startup] ⚠️ ${modelId} not found. Auto-loading ${modelId} model in LM Studio...`);
-                execFile('lms', ['load', modelId, '--gpu', 'max', '-y'], { timeout: 90000, windowsHide: true }, (loadErr) => {
-                    if (loadErr) {
-                        console.warn(`[Startup] Failed to auto-load ${modelId} in LM Studio:`, loadErr.message);
-                    } else {
-                        console.log(`[Startup] ✅ ${modelId} successfully loaded in LM Studio.`);
-                    }
-                });
-            }
-        });
-    });
+    // Log upstream status
+    console.log(`[Startup] Upstream LLM endpoint target: ${config.upstream_url}`);
 });
 
 const _dashboardServer = dashboardApp.listen(DASHBOARD_PORT, '127.0.0.1', () => {
