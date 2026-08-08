@@ -357,8 +357,8 @@ const OLLAMA_API_KEY = process.env.XRLF_PROXY_API_KEY || process.env.OLLAMA_API_
 // In cloud mode, chat completions go to Ollama Cloud, but compression checkpoints
 // still use local LM Studio. If LM Studio is offline, auto-start it headlessly
 // with the Qwen3.5-4B middleman model at 20% GPU offload.
-const LM_STUDIO_URL = process.env.LM_STUDIO_URL || process.env.LOCAL_LLM_BASE || 'http://127.0.0.1:7272';
-const MIDDLEMAN_MODEL = process.env.XRLF_MIDDLEMAN_MODEL || process.env.LOCAL_LLM_MODEL || 'qwen3.5-4b-abliterated';
+const LM_STUDIO_URL = process.env.LM_STUDIO_URL || process.env.LOCAL_LLM_BASE || 'http://127.0.0.1:8300';
+const MIDDLEMAN_MODEL = process.env.XRLF_MIDDLEMAN_MODEL || process.env.LOCAL_LLM_MODEL || 'xrlf-qwen4b-concise';
 const MIDDLEMAN_GPU_OFFLOAD = process.env.XRLF_MIDDLEMAN_GPU_OFFLOAD || '0.2';
 const MIDDLEMAN_CONTEXT_LENGTH = process.env.XRLF_MIDDLEMAN_CONTEXT_LENGTH || '8192';
 
@@ -922,7 +922,7 @@ async function handleChatCompletion(req, res, injectMessages = null, store, work
     if (SMART_PROXY_ENABLED) {
         try {
             const { smartRouteMessages } = require('./core/smart-router');
-            const upstream = (config && config.upstream_url) ? config.upstream_url : 'http://127.0.0.1:7272';
+            const upstream = (config && config.upstream_url) ? config.upstream_url : 'http://127.0.0.1:8300/v1';
             const middleman = (typeof MIDDLEMAN_MODEL !== 'undefined') ? MIDDLEMAN_MODEL : 'qwen2.5-0.5b-instruct';
             baseMessages = await smartRouteMessages(baseMessages, middleman, upstream);
         } catch (e) {

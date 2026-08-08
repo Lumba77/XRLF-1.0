@@ -1,6 +1,6 @@
 {
-  "proxy_port": 8202,
-  "upstream_url": "http://127.0.0.1:7272",
+  "proxy_port": 8301,
+  "upstream_url": "http://127.0.0.1:8300/v1",
   "workspace_id": "default",
   "workspace_mode": "personal",
   "identity_name": "Jenna (Jennifer Forbee)",
