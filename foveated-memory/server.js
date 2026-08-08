@@ -2646,20 +2646,22 @@ _server.listen(config.proxy_port, '127.0.0.1', () => {
         console.warn('[Continuity] Failed to load continuity state:', e.message);
     }
 
-    // --- Automatic Public Tunnel ---
-    console.log(`\n[Tunnel] Starting dedicated public tunnel for Google Orchestrator...`);
-    const { spawn } = require('child_process');
-    const tunnelCmd = `npx -y localtunnel --port ${config.proxy_port} --subdomain foveated-memory-public`;
-    const tunnel = spawn(tunnelCmd, { shell: true });
-    
-    tunnel.stdout.on('data', data => {
-        const out = data.toString().trim();
-        if (out) console.log(`[Tunnel] ${out}`);
-    });
-    tunnel.stderr.on('data', data => {
-        const err = data.toString().trim();
-        if (err) console.error(`[Tunnel Error] ${err}`);
-    });
+    // --- Optional Public Tunnel ---
+    if (process.env.XRLF_ENABLE_TUNNEL === 'true' || config.enable_public_tunnel === true) {
+        console.log(`\n[Tunnel] Starting public localtunnel on port ${config.proxy_port}...`);
+        const { spawn } = require('child_process');
+        const tunnelCmd = `npx -y localtunnel --port ${config.proxy_port}`;
+        const tunnel = spawn(tunnelCmd, { shell: true });
+        
+        tunnel.stdout.on('data', data => {
+            const out = data.toString().trim();
+            if (out) console.log(`[Tunnel] ${out}`);
+        });
+        tunnel.stderr.on('data', data => {
+            const err = data.toString().trim();
+            if (err) console.error(`[Tunnel Error] ${err}`);
+        });
+    }
 
     // Log upstream status
     console.log(`[Startup] Upstream LLM endpoint target: ${config.upstream_url}`);

@@ -28,6 +28,7 @@ program
     .option('-m, --mode <mode>',      'Workspace mode: personal | work', '')
     .option('-c, --config <path>',    'Path to a custom config.json', '')
     .option('-i, --identity <name>',  'AI identity name (e.g. Aria)', '')
+    .option('-t, --tunnel',           'Expose a public localtunnel URL (disabled by default)', false)
     .option('    --user <name>',      'User name', '')
     .parse(process.argv);
 
@@ -41,6 +42,7 @@ if (opts.workspace)  overrides.workspace_id    = opts.workspace;
 if (opts.mode)       overrides.workspace_mode  = opts.mode;
 if (opts.identity)   overrides.identity_name   = opts.identity;
 if (opts.user)       overrides.user_name        = opts.user;
+if (opts.tunnel)     overrides.enable_public_tunnel = true;
 
 // If a custom config path was given, merge it in
 if (opts.config) {
