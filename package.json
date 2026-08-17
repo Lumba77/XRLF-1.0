@@ -1,0 +1,17 @@
+{
+  "name": "xrlf-server",
+  "version": "1.0.12",
+  "description": "XRLF Protocol — Extended Reasoning Language Framework",
+  "main": "run_xrlf.py",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "xrlf",
+    "llm",
+    "reasoning",
+    "framework"
+  ],
+  "author": "Daniel Lundberg",
+  "license": "Apache-2.0"
+}
